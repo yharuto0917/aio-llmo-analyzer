@@ -45,6 +45,13 @@ export async function POST(req: NextRequest) {
 
     // Parse HTML with Cheerio
     const $ = cheerio.load(html || "");
+
+    // Remove unnecessary tags (JS, CSS, SVG, etc.) to eliminate noise from text extraction
+    $("script, style, noscript, svg, iframe").remove();
+
+    // Append a space to block-level elements to prevent words from sticking together
+    $("br, p, div, section, article, h1, h2, h3, h4, h5, h6, li").append(" ");
+
     const bodyText = $("body").text() || "";
     const cleanBodyText = bodyText.replace(/\s+/g, " ").trim();
 
@@ -529,55 +536,55 @@ Respond ONLY with a valid JSON object in the following format:
       evalText = "[MOCK EVALUATION] (Add GEMINI_API_KEY environment variable to evaluate accuracy). The LLM summary matches the server-fetched page structure and references relevant details.";
     }
 
-    // LLM Fetchability Check (30 pts)
-    const fetchabilityScore = geminiFetchSuccess ? 30 : 0;
+    // LLM Fetchability Check (40 pts)
+    const fetchabilityScore = geminiFetchSuccess ? 40 : 0;
     llmoScore += fetchabilityScore;
     llmoDetails.push({
       name: "LLM Bot-Blocker Exemption",
       score: fetchabilityScore,
-      max: 30,
+      max: 40,
       status: geminiFetchSuccess ? "pass" : "fail",
       description: geminiFetchSuccess
         ? "Gemini successfully bypassed all firewalls and successfully fetched your page contents."
         : "Gemini was blocked or failed to access the URL. Check your robots.txt or Cloudflare WAF blocklists.",
     });
 
-    // Content Accuracy Check (40 pts)
-    const accuracyPoints = Math.round((evalAccuracyScore / 100) * 40);
+    // Content Accuracy Check (20 pts)
+    const accuracyPoints = Math.round((evalAccuracyScore / 100) * 20);
     llmoScore += accuracyPoints;
     llmoDetails.push({
       name: "LLM Extraction Fidelity (Accuracy)",
       score: accuracyPoints,
-      max: 40,
-      status: accuracyPoints >= 30 ? "pass" : (accuracyPoints >= 15 ? "partial" : "fail"),
+      max: 20,
+      status: accuracyPoints >= 15 ? "pass" : (accuracyPoints >= 8 ? "partial" : "fail"),
       description: `Fidelity rate: ${evalAccuracyScore}%. ${evalText}`,
     });
 
-    // Fact & Data-Point Density (15 pts)
+    // Fact & Data-Point Density (20 pts)
     const numberMatches = cleanBodyText.match(/\b\d+(?:[\.,]\d+)?%?\b/g) || [];
     const hasStats = numberMatches.length > 5;
-    const statsScore = hasStats ? 15 : 5;
+    const statsScore = hasStats ? 20 : 10;
     llmoScore += statsScore;
     llmoDetails.push({
       name: "Factual Data & Statistics Density",
       score: statsScore,
-      max: 15,
-      status: statsScore === 15 ? "pass" : "partial",
+      max: 20,
+      status: statsScore === 20 ? "pass" : "partial",
       description: hasStats
         ? `Rich data density! Detected ${numberMatches.length} numbers/statistics. Highly beneficial for LLM citations.`
         : `Only found ${numberMatches.length} numeric tokens. AI systems prioritize facts and statistical metrics for claims.`,
     });
 
-    // Clear Entity Definition (15 pts)
+    // Clear Entity Definition (20 pts)
     const capitalizedWords = cleanBodyText.match(/\b[A-Z][a-z]+\b/g) || [];
     const hasEntities = capitalizedWords.length > 10 || (geminiEntities && geminiEntities.length >= 5);
-    const entityScore = hasEntities ? 15 : 5;
+    const entityScore = hasEntities ? 20 : 10;
     llmoScore += entityScore;
     llmoDetails.push({
       name: "Proper Noun Entity Density",
       score: entityScore,
-      max: 15,
-      status: entityScore === 15 ? "pass" : "partial",
+      max: 20,
+      status: entityScore === 20 ? "pass" : "partial",
       description: hasEntities
         ? `Found sufficient proper nouns or key entities. Perfect for entity disambiguation in the LLM Knowledge Graph.`
         : `Low entity count (${capitalizedWords.length} proper nouns, ${geminiEntities ? geminiEntities.length : 0} AI entities). Make sure your key services are labeled clearly.`,
