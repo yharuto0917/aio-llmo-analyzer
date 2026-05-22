@@ -423,6 +423,7 @@ export async function POST(req: NextRequest) {
           contents: fetchPrompt,
           config: {
             responseMimeType: "application/json",
+            tools: [{ googleSearch: {} }],
             thinkingConfig: {
               thinkingLevel: "medium" as any
             }
