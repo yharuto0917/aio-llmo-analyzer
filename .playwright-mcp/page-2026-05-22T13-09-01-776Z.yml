@@ -1,0 +1,123 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e7]: "MODULE: AIO_LLMO_INGESTION_LAB_v1.2.0"
+        - generic [ref=e8]:
+          - generic [ref=e9]:
+            - button "EN" [ref=e10] [cursor=pointer]
+            - generic [ref=e11]: /
+            - button "JP" [ref=e12] [cursor=pointer]
+          - generic [ref=e13]: SYSTEM_SECURE // ONLINE
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e16]
+          - generic [ref=e18]: COGNITIVE INDEXABILITY DIAGNOSTIC BENCH
+        - heading "AIO - LLMO Analyzer" [level=1] [ref=e19]
+        - paragraph [ref=e20]: Scientific auditing tool for parsing platform discoverability metrics across Generative Engine Indexes. Measures semantic indexability, schema entity coverage, and live Gemini ingestion accuracy.
+      - generic [ref=e22]:
+        - generic [ref=e23]: CMD://INIT_AUDIT
+        - textbox "ENTER TARGET DOMAIN OR DIRECT URL (e.g. example.com)" [ref=e24]: example.com
+        - button "RUN DIAGNOSTIC" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+          - generic [ref=e29]: RUN DIAGNOSTIC
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - generic [ref=e54]: "[ SYSTEM_VERDICT // OVERALL_COMPREHENSION ]"
+              - generic [ref=e55]: SYS_OK
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - generic [ref=e58]: "45"
+                - generic [ref=e59]: / 100 SCORE
+              - generic [ref=e61]:
+                - generic [ref=e62]: TELEMETRY LEVEL GAUGE
+                - generic [ref=e63]: 45% SIGNAL
+              - generic [ref=e85]:
+                - generic [ref=e88]: "STATUS: SEVERE CRITICAL DISCOVERY BLOCK"
+                - paragraph [ref=e89]: Composite index weighting represents 50% traditional search crawlability, 25% AI Overview structure parsing, and 25% dynamic LLM comprehension mapping.
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - generic [ref=e92]: "[ DIMENSIONAL_BREAKDOWN // INDEXABILITY_INDEX ]"
+              - generic [ref=e93]: 3_MODULES
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - generic [ref=e96]:
+                  - generic [ref=e97]:
+                    - img [ref=e98]
+                    - generic [ref=e101]: 01. SEO READINESS INDEX
+                  - generic [ref=e102]: 65 / 100
+                - generic [ref=e124]:
+                  - generic [ref=e125]: Traditional Search Ingest
+                  - generic [ref=e126]: "Weight: 50%"
+              - generic [ref=e127]:
+                - generic [ref=e128]:
+                  - generic [ref=e129]:
+                    - img [ref=e130]
+                    - generic [ref=e133]: 02. AI OVERVIEW CAPTURE CRITERIA
+                  - generic [ref=e134]: 30 / 100
+                - generic [ref=e156]:
+                  - generic [ref=e157]: Snippet Structuring
+                  - generic [ref=e158]: "Weight: 25%"
+              - generic [ref=e159]:
+                - generic [ref=e160]:
+                  - generic [ref=e161]:
+                    - img [ref=e162]
+                    - generic [ref=e165]: 03. COGNITIVE LLM COMPREHENSION
+                  - generic [ref=e166]: 20 / 100
+                - generic [ref=e188]:
+                  - generic [ref=e189]: Agent Crawling & Retrieval
+                  - generic [ref=e190]: "Weight: 25%"
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - button "[ 01 // SEO_METRICS ]" [ref=e193] [cursor=pointer]:
+              - img [ref=e194]
+              - generic [ref=e197]: "[ 01 // SEO_METRICS ]"
+            - button "[ 02 // AIO_STRUCTURE ]" [ref=e198] [cursor=pointer]:
+              - img [ref=e199]
+              - generic [ref=e202]: "[ 02 // AIO_STRUCTURE ]"
+            - button "[ 03 // LLMO_COGNITIVE ]" [ref=e203] [cursor=pointer]:
+              - img [ref=e204]
+              - generic [ref=e207]: "[ 03 // LLMO_COGNITIVE ]"
+            - button "[ 04 // HEX_VERIFY_BENCH ]" [active] [ref=e208] [cursor=pointer]:
+              - img [ref=e209]
+              - generic [ref=e212]: "[ 04 // HEX_VERIFY_BENCH ]"
+          - generic [ref=e344]:
+            - generic [ref=e345]:
+              - heading "Active Ingestion & Factual Extraction Bench" [level=4] [ref=e346]
+              - paragraph [ref=e347]: Fetches the raw document layout dynamically and initiates Gemini model query simulation to evaluate factual retrieval fidelity.
+            - generic [ref=e348]:
+              - generic [ref=e349]:
+                - generic [ref=e350]:
+                  - img [ref=e351]
+                  - text: COMPREHENSION_FIDELITY_COEFFICIENT
+                - generic [ref=e353]: 0%
+              - generic [ref=e375]:
+                - img [ref=e376]
+                - paragraph [ref=e378]:
+                  - strong [ref=e379]: "[ EVALUATION_ASSESSMENT ]:"
+                  - text: The LLM was blocked or failed to retrieve the page content directly, so content extraction fidelity could not be verified.
+            - generic [ref=e380]:
+              - generic [ref=e381]:
+                - generic [ref=e382]:
+                  - generic [ref=e383]: "[ BUFFER_DUMP: RAW_HTML_TEXT ]"
+                  - generic [ref=e384]: UTF-8 // STREAM
+                - generic [ref=e386]: Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more...
+              - generic [ref=e387]:
+                - generic [ref=e388]:
+                  - generic [ref=e389]: "[ COMPILATION: GEMINI_EXTRACT ]"
+                  - generic [ref=e390]: "MODEL: FLASH_LITE"
+                - generic [ref=e391]:
+                  - generic [ref=e392]:
+                    - text: // INGESTION_SUMMARY
+                    - paragraph [ref=e393]: The page serves as an example domain specifically reserved for documentation and educational purposes. It instructs users to avoid utilizing the domain in actual operational environments.
+                  - generic [ref=e394]:
+                    - text: // KNOWLEDGE_GRAPH_ENTITIES
+                    - generic [ref=e396]: Example Domain
+                  - generic [ref=e397]:
+                    - text: // CLAIMS_VERIFICATION_LOG
+                    - list
+  - button "Open Next.js Dev Tools" [ref=e35] [cursor=pointer]:
+    - img [ref=e36]
+  - alert [ref=e39]

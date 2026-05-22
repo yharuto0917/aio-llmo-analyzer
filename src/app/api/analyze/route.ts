@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import * as cheerio from "cheerio";
 
 // SDK will be initialized dynamically inside the request handler to support request-time environment variables
@@ -421,6 +421,10 @@ export async function POST(req: NextRequest) {
     let evalAccuracyScore = 0;
     let evalText = "";
 
+    // Detect language from server-fetched text to enforce LLM output language
+    const isJapanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(cleanBodyText);
+    const targetLanguage = isJapanese ? "Japanese" : "English";
+
     // Run active Gemini audits if environment key is defined
     if (process.env.GEMINI_API_KEY) {
       try {
@@ -428,7 +432,11 @@ export async function POST(req: NextRequest) {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         // Step A: Request Gemini to directly fetch the URL using its built-in knowledge & search grounding
-        const fetchPrompt = `Fetch the content of this URL: "${targetUrl}". Please summarize the main content of this webpage, extract the main entities (people, products, organizations, topics), and extract any key statistics, numbers, or data points mentioned on the page. Respond ONLY with a valid JSON object in the following format:
+        const fetchPrompt = `Fetch the content of this EXACT URL: "${targetUrl}".
+CRITICAL INSTRUCTION: You MUST ONLY extract information that is present specifically on this exact page. Do NOT navigate to, synthesize, or include information from other paths, subpages, or different URLs on the same domain.
+CRITICAL INSTRUCTION 2: You MUST output all text (summary, entities, statistics) strictly in ${targetLanguage}.
+
+Please summarize the main content of this webpage, extract the main entities (people, products, organizations, topics), and extract any key statistics, numbers, or data points mentioned on the page. Respond ONLY with a valid JSON object in the following format:
 {
   "success": true,
   "summary": "a brief 2-3 sentence summary of the page content",
@@ -441,15 +449,35 @@ export async function POST(req: NextRequest) {
           contents: fetchPrompt,
           config: {
             responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                success: { type: Type.BOOLEAN },
+                summary: { type: Type.STRING },
+                entities: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING }
+                },
+                statistics: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING }
+                }
+              },
+              required: ["success", "summary", "entities", "statistics"]
+            },
             tools: [{ googleSearch: {} }],
             thinkingConfig: {
-              thinkingLevel: "medium" as any
-            }
+              thinkingLevel: ThinkingLevel.MEDIUM
+            },
+            maxOutputTokens: 8192
           }
         });
 
         const rawText = fetchResponse.text || "{}";
-        let parsedResult: any = {};
+        console.log("=== GEMINI DIRECT FETCH RESPONSE ===");
+        console.log(rawText);
+        console.log("=====================================");
+        let parsedResult: { success?: boolean; summary?: string; entities?: string[]; statistics?: string[] } = {};
         try {
           parsedResult = JSON.parse(rawText);
         } catch {
@@ -461,11 +489,84 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        if (parsedResult.success) {
+        if (parsedResult.success && parsedResult.summary && parsedResult.summary.trim() !== "") {
           geminiFetchSuccess = true;
-          geminiSummary = parsedResult.summary || "Summary successfully extracted.";
+          geminiSummary = parsedResult.summary;
           geminiEntities = parsedResult.entities || [];
           geminiStats = parsedResult.statistics || [];
+        } else {
+          geminiFetchSuccess = false;
+        }
+
+        // If the direct LLM search fetch failed to produce a valid summary, but we have server-fetched text,
+        // use Gemini to summarize the server-fetched text as a backup so the user always gets a rich analysis!
+        if (serverFetchSuccess && (!geminiFetchSuccess || !geminiSummary)) {
+          try {
+            const fallbackPrompt = `You are analyzing the server-fetched content of the webpage: "${targetUrl}".
+The direct search fetch failed or was blocked, but we have successfully retrieved the webpage HTML content.
+Please analyze the following text content, summarize the main content, extract the main entities (people, products, organizations, topics), and extract key statistics, numbers, or data points.
+Respond ONLY with a valid JSON object in the following format:
+{
+  "success": true,
+  "summary": "a brief 2-3 sentence summary of the page content",
+  "entities": ["entity1", "entity2", ...],
+  "statistics": ["stat1", "stat2", ...]
+}
+
+Webpage Content:
+"""
+${cleanBodyText.slice(0, 4000)}
+"""`;
+
+            const fallbackResponse = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite",
+              contents: fallbackPrompt,
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    success: { type: Type.BOOLEAN },
+                    summary: { type: Type.STRING },
+                    entities: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING }
+                    },
+                    statistics: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING }
+                    }
+                  },
+                  required: ["success", "summary", "entities", "statistics"]
+                },
+                thinkingConfig: {
+                  thinkingLevel: ThinkingLevel.MEDIUM
+                }
+              }
+            });
+
+            const fbRawText = fallbackResponse.text || "{}";
+            console.log("=== GEMINI FALLBACK FETCH RESPONSE ===");
+            console.log(fbRawText);
+            console.log("======================================");
+            let fbParsed: { success?: boolean; summary?: string; entities?: string[]; statistics?: string[] } = {};
+            try {
+              fbParsed = JSON.parse(fbRawText);
+            } catch {
+              const cleanFb = fbRawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+              try {
+                fbParsed = JSON.parse(cleanFb);
+              } catch {}
+            }
+
+            if (fbParsed && fbParsed.success && fbParsed.summary) {
+              geminiSummary = fbParsed.summary;
+              geminiEntities = fbParsed.entities || [];
+              geminiStats = fbParsed.statistics || [];
+            }
+          } catch (fbError) {
+            console.error("Fallback Summary Error:", fbError);
+          }
         }
 
         // Step B: Ask Gemini to evaluate accuracy by comparing server-fetched text vs its own URL-fetched result
@@ -488,6 +589,8 @@ Evaluate:
 3. Assign an overall accuracy score between 0 and 100.
 4. Explain any discrepancies or missed information.
 
+CRITICAL INSTRUCTION: You MUST write the "evaluation" explanation strictly in ${targetLanguage}.
+
 Respond ONLY with a valid JSON object in the following format:
 {
   "success": true,
@@ -496,18 +599,31 @@ Respond ONLY with a valid JSON object in the following format:
 }`;
 
           const evalResponse = await ai.models.generateContent({
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-3.1-flash-lite-preview",
             contents: evalPrompt,
             config: {
               responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  success: { type: Type.BOOLEAN },
+                  accuracyScore: { type: Type.INTEGER },
+                  evaluation: { type: Type.STRING }
+                },
+                required: ["success", "accuracyScore", "evaluation"]
+              },
               thinkingConfig: {
-                thinkingLevel: "medium" as any
-              }
+                thinkingLevel: ThinkingLevel.MEDIUM
+              },
+              maxOutputTokens: 8192
             }
           });
 
           const evalRawText = evalResponse.text || "{}";
-          let evalParsed: any = {};
+          console.log("=== GEMINI EVALUATION RESPONSE ===");
+          console.log(evalRawText);
+          console.log("==================================");
+          let evalParsed: { success?: boolean; accuracyScore?: number; evaluation?: string } = {};
           try {
             evalParsed = JSON.parse(evalRawText);
           } catch {
@@ -521,6 +637,11 @@ Respond ONLY with a valid JSON object in the following format:
 
           evalAccuracyScore = evalParsed.accuracyScore || 0;
           evalText = evalParsed.evaluation || "Evaluation processed successfully.";
+        } else if (serverFetchSuccess) {
+          evalAccuracyScore = 0;
+          evalText = isJapanese
+            ? "LLMによる直接アクセス（Google Search Grounding）がブロックされたか、またはコンテンツの取得に失敗したため、コンテンツの抽出精度（Fidelity）を検証できませんでした。"
+            : "The LLM was blocked or failed to retrieve the page content directly, so content extraction fidelity could not be verified.";
         }
       } catch (e: any) {
         console.error("Gemini Audit Error:", e);
@@ -529,11 +650,19 @@ Respond ONLY with a valid JSON object in the following format:
     } else {
       // Mocked outputs for local dev when GEMINI_API_KEY is not defined
       geminiFetchSuccess = true;
-      geminiSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
-      geminiEntities = ["[MOCK] AIO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
-      geminiStats = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
-      evalAccuracyScore = 80;
-      evalText = "[MOCK EVALUATION] (Add GEMINI_API_KEY environment variable to evaluate accuracy). The LLM summary matches the server-fetched page structure and references relevant details.";
+      if (isJapanese) {
+        geminiSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
+        geminiEntities = ["[MOCK] AIOオプティマイザー", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
+        geminiStats = ["[MOCK] 精度98%", "[MOCK] 10倍高速"];
+        evalAccuracyScore = 80;
+        evalText = "[MOCK EVALUATION] (実際のAPIキーを設定して精度を評価してください) LLMの要約はサーバー取得のページ構造と一致し、関連する詳細を参照しています。";
+      } else {
+        geminiSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
+        geminiEntities = ["[MOCK] AIO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
+        geminiStats = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
+        evalAccuracyScore = 80;
+        evalText = "[MOCK EVALUATION] (Add GEMINI_API_KEY environment variable to evaluate accuracy). The LLM summary matches the server-fetched page structure and references relevant details.";
+      }
     }
 
     // LLM Fetchability Check (40 pts)
