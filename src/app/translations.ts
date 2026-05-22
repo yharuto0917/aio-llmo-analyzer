@@ -54,7 +54,9 @@ export const UI_TRANSLATIONS = {
     buffer_extract_sub: "MODEL: FLASH_LITE",
     summary_label: "// INGESTION_SUMMARY",
     entities_label: "// KNOWLEDGE_GRAPH_ENTITIES",
-    claims_label: "// CLAIMS_VERIFICATION_LOG"
+    claims_label: "// CLAIMS_VERIFICATION_LOG",
+    verify_assessment_text: "The model successfully parsed all structural data nodes without hallucination markers.",
+    content_richness: "Content Richness"
   },
   ja: {
     module: "モジュール: AIO_LLMO_INGESTION_LAB_v1.2.0",
@@ -108,7 +110,9 @@ export const UI_TRANSLATIONS = {
     buffer_extract_sub: "モデル: FLASH_LITE",
     summary_label: "// インジェスチョンサマリー",
     entities_label: "// ナレッジグラフエンティティ",
-    claims_label: "// 主張検証ログ"
+    claims_label: "// 主張検証ログ",
+    verify_assessment_text: "モデルは事実誤認の兆候なしにすべての主要データノードを正確に解釈しています。",
+    content_richness: "コンテンツ充実度"
   }
 };
 
@@ -303,6 +307,49 @@ export const TRANSLATIONS: Record<string, Record<string, { name: string; descrip
           return `固有名詞の検出数が少ない状態です（${matchFail[1]}個の固有名詞のみ検出）。製品名やコアエンティティを主語として明確に記述することを推奨します。`;
         }
         return "固有名詞が少ない状態です。サービス名や製品名などを明確な主語として記述することを推奨します。";
+      }
+    },
+    "LLM URL Context Extraction": {
+      name: "LLM URLコンテキスト抽出",
+      description: (desc) => desc.includes("successfully parsed")
+        ? "Geminiがウェブページのテキストコンテキストを正常に解析しました。"
+        : "Geminiがこのページのテキストコンテキストから有効な構造化データを抽出できませんでした。"
+    },
+    "LLM Content Richness Score": {
+      name: "LLM コンテンツ充実度スコア",
+      description: (desc) => {
+        const match = desc.match(/Evaluated Content Richness: (HIGH|MEDIUM|LOW)\. (.*)/);
+        if (match) {
+          const level = match[1] === "HIGH" ? "高" : (match[1] === "MEDIUM" ? "中" : "低");
+          return `評価されたコンテンツ充実度: ${level}。${match[1] === "HIGH" ? "ユーザーの意図に対して十分な詳細情報を提供しています。" : "詳細情報または深みが不足しています。"}`;
+        }
+        return desc;
+      }
+    },
+    "Factual Claims & Data Density": {
+      name: "事実の主張とデータ密度",
+      description: (desc) => {
+        if (desc.includes("Rich data density!")) {
+          const match = desc.match(/Detected (\d+) specific/);
+          const count = match ? match[1] : "0";
+          return `豊富なデータ密度！${count}個の具体的な事実の主張を検出しました。LLMの引用に非常に有益です。`;
+        } else {
+          const match = desc.match(/Only found (\d+) factual/);
+          const count = match ? match[1] : "0";
+          return `事実の主張は ${count}個しか検出されませんでした。AIシステムは主張に対して明確な事実や統計指標を優先します。`;
+        }
+      }
+    },
+    "Core Topic Density": {
+      name: "コアトピック密度",
+      description: (desc) => {
+        if (desc.includes("Found sufficient")) {
+          return "十分なコアトピックが検出されました。LLMナレッジグラフにおける実体関係の特定に最適です。";
+        } else {
+          const match = desc.match(/Low topic count \((\d+) topics\)/);
+          const count = match ? match[1] : "0";
+          return `トピック検出数が少ないです（${count}トピック）。重要なサービスやトピックが明確であることを確認してください。`;
+        }
       }
     }
   }

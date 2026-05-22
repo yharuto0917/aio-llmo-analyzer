@@ -192,7 +192,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                 <Info size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
                 <p style={{ fontSize: "0.75rem", lineHeight: "1.5", color: "var(--text-main)" }}>
                   <strong className="display-cyan" style={{ fontFamily: "var(--font-display)" }}>{text.verify_assessment} </strong>
-                  {lang === "ja" ? `コンテンツ充実度: ${results.llmVerification.contentRichness} (モデルは事実誤認の兆候なしにすべての主要データノードを正確に解釈しています。)` : `Content Richness: ${results.llmVerification.contentRichness} (The model successfully parsed all structural data nodes without hallucination markers.)`}
+                  {`${text.content_richness}: ${results.llmVerification.contentRichness} (${text.verify_assessment_text})`}
                 </p>
               </div>
             </div>
