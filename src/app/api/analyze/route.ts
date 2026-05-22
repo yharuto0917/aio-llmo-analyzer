@@ -246,7 +246,8 @@ export async function POST(req: NextRequest) {
       if (nextEl.length > 0) {
         const text = nextEl.text().trim();
         const wordCount = text.split(/\s+/).length;
-        if (wordCount >= 30 && wordCount <= 80) {
+        const charCount = text.length;
+        if ((wordCount >= 30 && wordCount <= 80) || (charCount >= 100 && charCount <= 300)) {
           directAnswerFound = true;
         }
       }
@@ -288,7 +289,17 @@ export async function POST(req: NextRequest) {
         text.includes("when") ||
         text.includes("where") ||
         text.includes("which") ||
-        text.includes("?")
+        text.includes("?") ||
+        text.includes("とは") ||
+        text.includes("方法") ||
+        text.includes("なぜ") ||
+        text.includes("理由") ||
+        text.includes("どうやって") ||
+        text.includes("誰") ||
+        text.includes("いつ") ||
+        text.includes("どこ") ||
+        text.includes("どれ") ||
+        text.includes("？")
       ) {
         questionHeadingFound = true;
       }
@@ -559,7 +570,7 @@ Respond ONLY with a valid JSON object in the following format:
 
     // Clear Entity Definition (15 pts)
     const capitalizedWords = cleanBodyText.match(/\b[A-Z][a-z]+\b/g) || [];
-    const hasEntities = capitalizedWords.length > 10;
+    const hasEntities = capitalizedWords.length > 10 || (geminiEntities && geminiEntities.length >= 5);
     const entityScore = hasEntities ? 15 : 5;
     llmoScore += entityScore;
     llmoDetails.push({
@@ -568,8 +579,8 @@ Respond ONLY with a valid JSON object in the following format:
       max: 15,
       status: entityScore === 15 ? "pass" : "partial",
       description: hasEntities
-        ? `Found ${capitalizedWords.length} proper nouns. Perfect for entity disambiguation in the LLM Knowledge Graph.`
-        : `Low entity count (${capitalizedWords.length} proper nouns found). Make sure your key services are labeled clearly.`,
+        ? `Found sufficient proper nouns or key entities. Perfect for entity disambiguation in the LLM Knowledge Graph.`
+        : `Low entity count (${capitalizedWords.length} proper nouns, ${geminiEntities ? geminiEntities.length : 0} AI entities). Make sure your key services are labeled clearly.`,
     });
 
 
