@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import * as cheerio from "cheerio";
 
 // SDK will be initialized dynamically inside the request handler to support request-time environment variables
@@ -415,310 +415,169 @@ export async function POST(req: NextRequest) {
     const llmoDetails = [];
     let llmoScore = 0;
     let geminiFetchSuccess = false;
-    let geminiSummary = "";
-    let geminiEntities: string[] = [];
-    let geminiStats: string[] = [];
-    let evalAccuracyScore = 0;
-    let evalText = "";
+    let pageSummary = "";
+    let coreTopics: string[] = [];
+    let keyClaimsOrFacts: string[] = [];
+    let contentRichness: "HIGH" | "MEDIUM" | "LOW" = "LOW";
+    let richnessScore = 0;
 
     // Detect language from server-fetched text to enforce LLM output language
     const isJapanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(cleanBodyText);
     const targetLanguage = isJapanese ? "Japanese" : "English";
 
-    // Run active Gemini audits if environment key is defined
     if (process.env.GEMINI_API_KEY) {
       try {
-        // Initialize Gemini SDK with request-time environment variable to avoid static global instantiation issues
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-        // Step A: Request Gemini to directly fetch the URL using its built-in knowledge & search grounding
-        const fetchPrompt = `Fetch the content of this EXACT URL: "${targetUrl}".
-CRITICAL INSTRUCTION: You MUST ONLY extract information that is present specifically on this exact page. Do NOT navigate to, synthesize, or include information from other paths, subpages, or different URLs on the same domain.
-CRITICAL INSTRUCTION 2: You MUST output all text (summary, entities, statistics) strictly in ${targetLanguage}.
+        if (serverFetchSuccess && cleanBodyText.trim().length > 0) {
+          const fetchPrompt = `You are an AI analyzing the text content of a webpage.
+The webpage content was fetched from the URL: "${targetUrl}".
 
-Please summarize the main content of this webpage, extract the main entities (people, products, organizations, topics), and extract any key statistics, numbers, or data points mentioned on the page. Respond ONLY with a valid JSON object in the following format:
-{
-  "success": true,
-  "summary": "a brief 2-3 sentence summary of the page content",
-  "entities": ["entity1", "entity2", ...],
-  "statistics": ["stat1", "stat2", ...]
-}`;
+CRITICAL INSTRUCTION: You MUST output all text (summary, topics, claims) strictly in ${targetLanguage}.
 
-        const fetchResponse = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: fetchPrompt,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                success: { type: Type.BOOLEAN },
-                summary: { type: Type.STRING },
-                entities: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING }
-                },
-                statistics: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING }
-                }
-              },
-              required: ["success", "summary", "entities", "statistics"]
-            },
-            tools: [{ googleSearch: {} }],
-            thinkingConfig: {
-              thinkingLevel: ThinkingLevel.MEDIUM
-            },
-            maxOutputTokens: 8192
-          }
-        });
+Please analyze the following text content. Extract:
+1. A brief 2-3 sentence summary of the page content.
+2. The core topics or main keywords that are the focus of this page.
+3. The key claims, facts, numbers, or data points specifically stated in this text.
+4. An evaluation of the content's richness ("HIGH", "MEDIUM", or "LOW") indicating if it has enough detailed information to answer user questions effectively.
 
-        const rawText = fetchResponse.text || "{}";
-        console.log("=== GEMINI DIRECT FETCH RESPONSE ===");
-        console.log(rawText);
-        console.log("=====================================");
-        let parsedResult: { success?: boolean; summary?: string; entities?: string[]; statistics?: string[] } = {};
-        try {
-          parsedResult = JSON.parse(rawText);
-        } catch {
-          const cleanJsonStr = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-          try {
-            parsedResult = JSON.parse(cleanJsonStr);
-          } catch {
-            parsedResult = { success: rawText.toLowerCase().includes("success\": true") };
-          }
-        }
-
-        if (parsedResult.success && parsedResult.summary && parsedResult.summary.trim() !== "") {
-          geminiFetchSuccess = true;
-          geminiSummary = parsedResult.summary;
-          geminiEntities = parsedResult.entities || [];
-          geminiStats = parsedResult.statistics || [];
-        } else {
-          geminiFetchSuccess = false;
-        }
-
-        // If the direct LLM search fetch failed to produce a valid summary, but we have server-fetched text,
-        // use Gemini to summarize the server-fetched text as a backup so the user always gets a rich analysis!
-        if (serverFetchSuccess && (!geminiFetchSuccess || !geminiSummary)) {
-          try {
-            const fallbackPrompt = `You are analyzing the server-fetched content of the webpage: "${targetUrl}".
-The direct search fetch failed or was blocked, but we have successfully retrieved the webpage HTML content.
-Please analyze the following text content, summarize the main content, extract the main entities (people, products, organizations, topics), and extract key statistics, numbers, or data points.
 Respond ONLY with a valid JSON object in the following format:
 {
   "success": true,
   "summary": "a brief 2-3 sentence summary of the page content",
-  "entities": ["entity1", "entity2", ...],
-  "statistics": ["stat1", "stat2", ...]
+  "coreTopics": ["topic1", "topic2"],
+  "keyClaimsOrFacts": ["claim1", "claim2"],
+  "contentRichness": "HIGH"
 }
 
 Webpage Content:
 """
-${cleanBodyText.slice(0, 4000)}
+${cleanBodyText.slice(0, 8000)}
 """`;
 
-            const fallbackResponse = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite",
-              contents: fallbackPrompt,
-              config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                  type: Type.OBJECT,
-                  properties: {
-                    success: { type: Type.BOOLEAN },
-                    summary: { type: Type.STRING },
-                    entities: {
-                      type: Type.ARRAY,
-                      items: { type: Type.STRING }
-                    },
-                    statistics: {
-                      type: Type.ARRAY,
-                      items: { type: Type.STRING }
-                    }
-                  },
-                  required: ["success", "summary", "entities", "statistics"]
-                },
-                thinkingConfig: {
-                  thinkingLevel: ThinkingLevel.MEDIUM
-                }
-              }
-            });
-
-            const fbRawText = fallbackResponse.text || "{}";
-            console.log("=== GEMINI FALLBACK FETCH RESPONSE ===");
-            console.log(fbRawText);
-            console.log("======================================");
-            let fbParsed: { success?: boolean; summary?: string; entities?: string[]; statistics?: string[] } = {};
-            try {
-              fbParsed = JSON.parse(fbRawText);
-            } catch {
-              const cleanFb = fbRawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-              try {
-                fbParsed = JSON.parse(cleanFb);
-              } catch {}
-            }
-
-            if (fbParsed && fbParsed.success && fbParsed.summary) {
-              geminiSummary = fbParsed.summary;
-              geminiEntities = fbParsed.entities || [];
-              geminiStats = fbParsed.statistics || [];
-            }
-          } catch (fbError) {
-            console.error("Fallback Summary Error:", fbError);
-          }
-        }
-
-        // Step B: Ask Gemini to evaluate accuracy by comparing server-fetched text vs its own URL-fetched result
-        if (serverFetchSuccess && geminiFetchSuccess) {
-          const evalPrompt = `Compare the actual text content of a webpage with a summary and data points generated by an LLM that tried to fetch the URL directly.
-
-Actual Webpage Text (Server Fetched):
-"""
-${cleanBodyText.slice(0, 4000)}
-"""
-
-LLM URL-Fetched Result:
-Summary: ${geminiSummary || "None"}
-Entities: ${(geminiEntities || []).join(", ") || "None"}
-Statistics: ${(geminiStats || []).join(", ") || "None"}
-
-Evaluate:
-1. Did the LLM successfully retrieve the actual content of the webpage? (Look for matches in core facts, names, and numbers).
-2. Is the LLM's summary accurate and free of hallucinations compared to the actual text?
-3. Assign an overall accuracy score between 0 and 100.
-4. Explain any discrepancies or missed information.
-
-CRITICAL INSTRUCTION: You MUST write the "evaluation" explanation strictly in ${targetLanguage}.
-
-Respond ONLY with a valid JSON object in the following format:
-{
-  "success": true,
-  "accuracyScore": 85,
-  "evaluation": "explanation of the rating"
-}`;
-
-          const evalResponse = await ai.models.generateContent({
+          const fetchResponse = await ai.models.generateContent({
             model: "gemini-3.1-flash-lite-preview",
-            contents: evalPrompt,
+            contents: fetchPrompt,
             config: {
+              temperature: 0,
               responseMimeType: "application/json",
               responseSchema: {
-                type: Type.OBJECT,
+                type: "OBJECT",
                 properties: {
-                  success: { type: Type.BOOLEAN },
-                  accuracyScore: { type: Type.INTEGER },
-                  evaluation: { type: Type.STRING }
+                  success: { type: "BOOLEAN" },
+                  summary: { type: "STRING" },
+                  coreTopics: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                  },
+                  keyClaimsOrFacts: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                  },
+                  contentRichness: { 
+                    type: "STRING",
+                    enum: ["HIGH", "MEDIUM", "LOW"]
+                  }
                 },
-                required: ["success", "accuracyScore", "evaluation"]
+                required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "contentRichness"]
               },
-              thinkingConfig: {
-                thinkingLevel: ThinkingLevel.MEDIUM
-              },
+              tools: [{ urlContext: {} }],
               maxOutputTokens: 8192
             }
           });
 
-          const evalRawText = evalResponse.text || "{}";
-          console.log("=== GEMINI EVALUATION RESPONSE ===");
-          console.log(evalRawText);
-          console.log("==================================");
-          let evalParsed: { success?: boolean; accuracyScore?: number; evaluation?: string } = {};
+          const rawText = fetchResponse.text || "{}";
+          let parsedResult: { success?: boolean; summary?: string; coreTopics?: string[]; keyClaimsOrFacts?: string[]; contentRichness?: "HIGH" | "MEDIUM" | "LOW" } = {};
           try {
-            evalParsed = JSON.parse(evalRawText);
+            parsedResult = JSON.parse(rawText);
           } catch {
-            const cleanJsonStr = evalRawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+            const cleanJsonStr = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
             try {
-              evalParsed = JSON.parse(cleanJsonStr);
-            } catch {
-              evalParsed = { accuracyScore: 75, evaluation: "Succeeded in extraction with some formatting issues." };
-            }
+              parsedResult = JSON.parse(cleanJsonStr);
+            } catch {}
           }
 
-          evalAccuracyScore = evalParsed.accuracyScore || 0;
-          evalText = evalParsed.evaluation || "Evaluation processed successfully.";
-        } else if (serverFetchSuccess) {
-          evalAccuracyScore = 0;
-          evalText = isJapanese
-            ? "LLMによる直接アクセス（Google Search Grounding）がブロックされたか、またはコンテンツの取得に失敗したため、コンテンツの抽出精度（Fidelity）を検証できませんでした。"
-            : "The LLM was blocked or failed to retrieve the page content directly, so content extraction fidelity could not be verified.";
+          if (parsedResult.success && parsedResult.summary) {
+            geminiFetchSuccess = true;
+            pageSummary = parsedResult.summary;
+            coreTopics = parsedResult.coreTopics || [];
+            keyClaimsOrFacts = parsedResult.keyClaimsOrFacts || [];
+            contentRichness = parsedResult.contentRichness || "LOW";
+          }
         }
       } catch (e: any) {
         console.error("Gemini Audit Error:", e);
-        evalText = `Error calling Gemini API: ${e.message}`;
       }
     } else {
-      // Mocked outputs for local dev when GEMINI_API_KEY is not defined
       geminiFetchSuccess = true;
       if (isJapanese) {
-        geminiSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
-        geminiEntities = ["[MOCK] AIOオプティマイザー", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
-        geminiStats = ["[MOCK] 精度98%", "[MOCK] 10倍高速"];
-        evalAccuracyScore = 80;
-        evalText = "[MOCK EVALUATION] (実際のAPIキーを設定して精度を評価してください) LLMの要約はサーバー取得のページ構造と一致し、関連する詳細を参照しています。";
+        pageSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
+        coreTopics = ["[MOCK] AIOオプティマイザー", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
+        keyClaimsOrFacts = ["[MOCK] 精度98%", "[MOCK] 10倍高速"];
+        contentRichness = "HIGH";
       } else {
-        geminiSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
-        geminiEntities = ["[MOCK] AIO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
-        geminiStats = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
-        evalAccuracyScore = 80;
-        evalText = "[MOCK EVALUATION] (Add GEMINI_API_KEY environment variable to evaluate accuracy). The LLM summary matches the server-fetched page structure and references relevant details.";
+        pageSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
+        coreTopics = ["[MOCK] AIO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
+        keyClaimsOrFacts = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
+        contentRichness = "HIGH";
       }
     }
 
-    // LLM Fetchability Check (40 pts)
+    if (contentRichness === "HIGH") richnessScore = 100;
+    else if (contentRichness === "MEDIUM") richnessScore = 50;
+    else richnessScore = 0;
+
+    // LLM Parseability Check (40 pts) - Since we use URL Context, we check if LLM successfully parsed the HTML text
     const fetchabilityScore = geminiFetchSuccess ? 40 : 0;
     llmoScore += fetchabilityScore;
     llmoDetails.push({
-      name: "LLM Bot-Blocker Exemption",
+      name: "LLM URL Context Extraction",
       score: fetchabilityScore,
       max: 40,
       status: geminiFetchSuccess ? "pass" : "fail",
       description: geminiFetchSuccess
-        ? "Gemini successfully bypassed all firewalls and successfully fetched your page contents."
-        : "Gemini was blocked or failed to access the URL. Check your robots.txt or Cloudflare WAF blocklists.",
+        ? "Gemini successfully parsed the text context of this webpage."
+        : "Gemini failed to extract valid structured data from this page's text context.",
     });
 
-    // Content Accuracy Check (20 pts)
-    const accuracyPoints = Math.round((evalAccuracyScore / 100) * 20);
+    // Content Richness Check (20 pts)
+    const accuracyPoints = Math.round((richnessScore / 100) * 20);
     llmoScore += accuracyPoints;
     llmoDetails.push({
-      name: "LLM Extraction Fidelity (Accuracy)",
+      name: "LLM Content Richness Score",
       score: accuracyPoints,
       max: 20,
       status: accuracyPoints >= 15 ? "pass" : (accuracyPoints >= 8 ? "partial" : "fail"),
-      description: `Fidelity rate: ${evalAccuracyScore}%. ${evalText}`,
+      description: `Evaluated Content Richness: ${contentRichness}. ${contentRichness === "HIGH" ? "Provides sufficient details to answer user intents." : "Lacking depth or detail."}`,
     });
 
     // Fact & Data-Point Density (20 pts)
-    const numberMatches = cleanBodyText.match(/\b\d+(?:[\.,]\d+)?%?\b/g) || [];
-    const hasStats = numberMatches.length > 5;
-    const statsScore = hasStats ? 20 : 10;
+    const hasStats = keyClaimsOrFacts.length >= 3;
+    const statsScore = hasStats ? 20 : (keyClaimsOrFacts.length > 0 ? 10 : 0);
     llmoScore += statsScore;
     llmoDetails.push({
-      name: "Factual Data & Statistics Density",
+      name: "Factual Claims & Data Density",
       score: statsScore,
       max: 20,
-      status: statsScore === 20 ? "pass" : "partial",
+      status: statsScore === 20 ? "pass" : (statsScore === 10 ? "partial" : "fail"),
       description: hasStats
-        ? `Rich data density! Detected ${numberMatches.length} numbers/statistics. Highly beneficial for LLM citations.`
-        : `Only found ${numberMatches.length} numeric tokens. AI systems prioritize facts and statistical metrics for claims.`,
+        ? `Rich data density! Detected ${keyClaimsOrFacts.length} specific factual claims. Highly beneficial for LLM citations.`
+        : `Only found ${keyClaimsOrFacts.length} factual claims. AI systems prioritize clear facts and statistical metrics for claims.`,
     });
 
-    // Clear Entity Definition (20 pts)
-    const capitalizedWords = cleanBodyText.match(/\b[A-Z][a-z]+\b/g) || [];
-    const hasEntities = capitalizedWords.length > 10 || (geminiEntities && geminiEntities.length >= 5);
-    const entityScore = hasEntities ? 20 : 10;
+    // Core Topic Definition (20 pts)
+    const hasEntities = coreTopics.length >= 4;
+    const entityScore = hasEntities ? 20 : (coreTopics.length > 0 ? 10 : 0);
     llmoScore += entityScore;
     llmoDetails.push({
-      name: "Proper Noun Entity Density",
+      name: "Core Topic Density",
       score: entityScore,
       max: 20,
-      status: entityScore === 20 ? "pass" : "partial",
+      status: entityScore === 20 ? "pass" : (entityScore === 10 ? "partial" : "fail"),
       description: hasEntities
-        ? `Found sufficient proper nouns or key entities. Perfect for entity disambiguation in the LLM Knowledge Graph.`
-        : `Low entity count (${capitalizedWords.length} proper nouns, ${geminiEntities ? geminiEntities.length : 0} AI entities). Make sure your key services are labeled clearly.`,
+        ? `Found sufficient core topics. Perfect for entity disambiguation in the LLM Knowledge Graph.`
+        : `Low topic count (${coreTopics.length} topics). Make sure your key services and topics are clear.`,
     });
-
 
     // ----------------------------------------------------
     // COMPREHENSIVE SCORE CALCULATION
@@ -739,11 +598,11 @@ Respond ONLY with a valid JSON object in the following format:
       llmoDetails,
       llmVerification: {
         rawFetchedSnippet: cleanBodyText.substring(0, 1000) + "...",
-        geminiSummary,
-        geminiEntities,
-        geminiStats,
-        evalAccuracyScore,
-        evalText,
+        pageSummary,
+        coreTopics,
+        keyClaimsOrFacts,
+        richnessScore: richnessScore,
+        contentRichness,
       },
       serverFetchSuccess,
       fetchError,

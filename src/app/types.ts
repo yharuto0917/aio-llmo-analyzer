@@ -19,11 +19,11 @@ export interface AnalysisResults {
   llmoDetails: DetailItem[];
   llmVerification: {
     rawFetchedSnippet: string;
-    geminiSummary: string;
-    geminiEntities: string[];
-    geminiStats: string[];
-    evalAccuracyScore: number;
-    evalText: string;
+    pageSummary: string;
+    coreTopics: string[];
+    keyClaimsOrFacts: string[];
+    richnessScore: number;
+    contentRichness: "HIGH" | "MEDIUM" | "LOW";
   };
   serverFetchSuccess: boolean;
   fetchError: string;
