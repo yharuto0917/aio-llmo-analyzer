@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     try {
       const response = await fetch(targetUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 AIO-LLMO-Analyzer/1.0",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 LLMO-Optimizer/1.0",
         },
         signal: AbortSignal.timeout(10000), // 10s timeout
       });
@@ -507,12 +507,12 @@ Respond ONLY with a valid JSON object in the following format:
       geminiFetchSuccess = true;
       if (isJapanese) {
         pageSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
-        coreTopics = ["[MOCK] AIOオプティマイザー", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
+        coreTopics = ["[MOCK] LLMO Optimizer", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
         keyClaimsOrFacts = ["[MOCK] 精度98%", "[MOCK] 10倍高速"];
         contentRichness = "HIGH";
       } else {
         pageSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
-        coreTopics = ["[MOCK] AIO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
+        coreTopics = ["[MOCK] LLMO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
         keyClaimsOrFacts = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
         contentRichness = "HIGH";
       }
