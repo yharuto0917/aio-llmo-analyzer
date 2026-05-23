@@ -183,16 +183,16 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                 <span style={{ fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-heading)", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>
                   <Zap size={14} className="display-cyan" /> {text.verify_coeff}
                 </span>
-                <span className={`display-title ${getStatusColorClass(results.llmVerification.evalAccuracyScore)}`} style={{ fontSize: "1.75rem" }}>
-                  {results.llmVerification.evalAccuracyScore}%
+                <span className={`display-title ${getStatusColorClass(results.llmVerification.richnessScore)}`} style={{ fontSize: "1.75rem" }}>
+                  {results.llmVerification.richnessScore}%
                 </span>
               </div>
-              <SegmentedMeter score={results.llmVerification.evalAccuracyScore} />
+              <SegmentedMeter score={results.llmVerification.richnessScore} />
               <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem", borderTop: "1px solid var(--border-color)", paddingTop: "1rem" }}>
                 <Info size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
                 <p style={{ fontSize: "0.75rem", lineHeight: "1.5", color: "var(--text-main)" }}>
                   <strong className="display-cyan" style={{ fontFamily: "var(--font-display)" }}>{text.verify_assessment} </strong>
-                  {results.llmVerification.evalText || (lang === "ja" ? "情報収集に成功しました。モデルはHallucinationや事実誤認の兆候なしにすべての主要データノードを正確に解釈しています。" : "Ingestion completed successfully. The model successfully parsed all structural data nodes without hallucination markers.")}
+                  {`${text.content_richness}: ${results.llmVerification.contentRichness} (${text.verify_assessment_text})`}
                 </p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.summary_label}</span>
                     <p style={{ fontSize: "0.75rem", marginTop: "0.45rem", lineHeight: "1.5", color: "var(--text-main)" }}>
-                      {results.llmVerification.geminiSummary}
+                      {results.llmVerification.pageSummary}
                     </p>
                   </div>
 
@@ -251,7 +251,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.entities_label}</span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem", marginTop: "0.5rem" }}>
-                      {results.llmVerification.geminiEntities.map((ent, idx) => (
+                      {results.llmVerification.coreTopics.map((ent, idx) => (
                         <span key={idx} style={{ 
                           background: "rgba(0, 229, 255, 0.04)", 
                           border: "1px solid rgba(0, 229, 255, 0.15)", 
@@ -269,7 +269,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.claims_label}</span>
                     <ul style={{ fontSize: "0.75rem", listStyleType: "none", marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-                      {results.llmVerification.geminiStats.map((stat, idx) => (
+                      {results.llmVerification.keyClaimsOrFacts.map((stat, idx) => (
                         <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", lineHeight: "1.4" }}>
                           <span className="display-cyan" style={{ flexShrink: 0 }}>&gt;&gt;</span>
                           <span style={{ color: "var(--text-main)" }}>{stat}</span>
