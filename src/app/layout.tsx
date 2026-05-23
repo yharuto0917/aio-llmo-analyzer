@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIO-LLMO Analyzer",
+  title: "LLMO Optimizer",
   description: "Advanced Search Engine, AI Overview, and Large Language Model Optimization Audit Tool.",
 };
 
