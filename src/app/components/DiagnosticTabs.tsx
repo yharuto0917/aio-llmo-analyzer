@@ -172,6 +172,28 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
               <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>{text.verify_tab_sub}</p>
             </div>
 
+            {results.llmVerification.mockFallbackUsed && (
+              <div style={{
+                background: "var(--color-warning-glow)",
+                border: "1px dashed var(--color-warning)",
+                padding: "1rem",
+                marginBottom: "1.5rem",
+                display: "flex",
+                gap: "0.75rem",
+                alignItems: "flex-start"
+              }}>
+                <AlertTriangle size={18} className="display-warning" style={{ flexShrink: 0, marginTop: "0.1rem" }} />
+                <div>
+                  <h5 style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem", margin: 0, textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-display)" }}>
+                    {text.mock_warning_title}
+                  </h5>
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.5", margin: "0.25rem 0 0 0" }}>
+                    {text.mock_warning_text}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Comprehension Rating Strip */}
             <div style={{ 
               background: "rgba(0, 229, 255, 0.01)", 

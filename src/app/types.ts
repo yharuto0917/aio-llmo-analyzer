@@ -24,6 +24,7 @@ export interface AnalysisResults {
     keyClaimsOrFacts: string[];
     richnessScore: number;
     contentRichness: "HIGH" | "MEDIUM" | "LOW";
+    mockFallbackUsed: boolean;
   };
   serverFetchSuccess: boolean;
   fetchError: string;

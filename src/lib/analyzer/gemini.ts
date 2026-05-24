@@ -116,14 +116,8 @@ ${cleanBodyText.slice(0, 8000)}
     mockFallbackUsed = true;
     if (isJapanese) {
       pageSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
-      coreTopics = ["[MOCK] LLMO Optimizer", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
-      keyClaimsOrFacts = ["[MOCK] 精度98%", "[MOCK] 10倍高速"];
-      contentRichness = "HIGH";
     } else {
       pageSummary = "[MOCK SUMMARY] (Add GEMINI_API_KEY environment variable to test real-time LLM fetch capability). The page appears to be a corporate website detailing its product services and optimization plans.";
-      coreTopics = ["[MOCK] LLMO Optimizer", "[MOCK] Search Engine", "[MOCK] Web Crawler"];
-      keyClaimsOrFacts = ["[MOCK] 98% accuracy", "[MOCK] 10x faster"];
-      contentRichness = "HIGH";
     }
   }
 

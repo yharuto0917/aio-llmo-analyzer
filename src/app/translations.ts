@@ -56,7 +56,9 @@ export const UI_TRANSLATIONS = {
     entities_label: "// KNOWLEDGE_GRAPH_ENTITIES",
     claims_label: "// CLAIMS_VERIFICATION_LOG",
     verify_assessment_text: "The model successfully parsed all structural data nodes without hallucination markers.",
-    content_richness: "Content Richness"
+    content_richness: "Content Richness",
+    mock_warning_title: "API KEY NOT CONFIGURED / MOCK DATA IN USE",
+    mock_warning_text: "Because GEMINI_API_KEY is not set or the API call failed, live LLM retrieval and cognitive analysis have been bypassed. Shown data is simulated using mock text, and LLMO scoring is penalized to 0."
   },
   ja: {
     module: "モジュール: AIO_LLMO_INGESTION_LAB_v1.2.0",
@@ -112,7 +114,9 @@ export const UI_TRANSLATIONS = {
     entities_label: "// ナレッジグラフエンティティ",
     claims_label: "// 主張検証ログ",
     verify_assessment_text: "モデルは事実誤認の兆候なしにすべての主要データノードを正確に解釈しています。",
-    content_richness: "コンテンツ充実度"
+    content_richness: "コンテンツ充実度",
+    mock_warning_title: "APIキー未設定 / モックデータ使用中",
+    mock_warning_text: "GEMINI_API_KEY が環境変数に設定されていないか、APIの呼び出しに失敗したため、リアルタイムのLLMインジェスチョンおよび認知解析はスキップされました。表示されているデータはシミュレートされたモックデータであり、LLMOスコアは0に制限されています。"
   }
 };
 

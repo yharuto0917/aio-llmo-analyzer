@@ -49,8 +49,10 @@ export async function POST(req: NextRequest) {
 
     // Build compatibility metrics
     let richnessScore = 0;
-    if (geminiAnalysis.contentRichness === "HIGH") richnessScore = 100;
-    else if (geminiAnalysis.contentRichness === "MEDIUM") richnessScore = 50;
+    if (!geminiAnalysis.mockFallbackUsed) {
+      if (geminiAnalysis.contentRichness === "HIGH") richnessScore = 100;
+      else if (geminiAnalysis.contentRichness === "MEDIUM") richnessScore = 50;
+    }
 
     return NextResponse.json({
       url: targetUrl,
