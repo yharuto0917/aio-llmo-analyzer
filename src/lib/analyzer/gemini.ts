@@ -83,6 +83,9 @@ Respond ONLY with a valid JSON object in the following format:
         });
 
         const rawText = fetchResponse.text || "{}";
+        console.log("=== GEMINI API RESPONSE RAW TEXT ===");
+        console.log(rawText);
+        console.log("=====================================");
         let parsedResult: { success?: boolean; summary?: string; coreTopics?: string[]; keyClaimsOrFacts?: string[]; contentRichness?: "HIGH" | "MEDIUM" | "LOW" } = {};
         try {
           parsedResult = JSON.parse(rawText);
