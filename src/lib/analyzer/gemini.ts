@@ -102,16 +102,30 @@ Respond ONLY with a valid JSON object in the following format:
           coreTopics = parsedResult.coreTopics || [];
           keyClaimsOrFacts = parsedResult.keyClaimsOrFacts || [];
           contentRichness = parsedResult.contentRichness || "LOW";
+        } else {
+          // LLM successfully responded but returned success: false or invalid JSON.
+          // This is a normal LLM evaluation/behavior resulting in a 0 score (no system error is logged).
+          geminiFetchSuccess = false;
+          pageSummary = parsedResult.summary || (isJapanese 
+            ? "LLM分析により、このページには有効なコンテンツ構造が検出されませんでした。" 
+            : "No valid content structure was identified on this page during LLM analysis.");
+          coreTopics = [];
+          keyClaimsOrFacts = [];
+          contentRichness = "LOW";
         }
       }
     } catch (e: unknown) {
       console.error("Gemini Audit Error:", e);
+      mockFallbackUsed = true;
     }
+  } else {
+    // API key is missing. This is a setup error.
+    console.error("Gemini API Key is missing. Live LLM analysis is bypassed.");
+    mockFallbackUsed = true;
   }
 
   // Fallback to mock data if Gemini API failed or apiKey is missing
-  if (!geminiFetchSuccess) {
-    mockFallbackUsed = true;
+  if (mockFallbackUsed) {
     if (isJapanese) {
       pageSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
     } else {
