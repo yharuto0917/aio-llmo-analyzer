@@ -44,3 +44,8 @@ next-env.d.ts
 .open-next/
 .wrangler/
 
+# Antigravity CLI
+.antigravitycli
+
+# Playwright MCP
+.playwright-mcp

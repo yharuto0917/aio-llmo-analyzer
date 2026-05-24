@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 export interface GeminiAnalysisResult {
   geminiFetchSuccess: boolean;
+  mockFallbackUsed: boolean;
   pageSummary: string;
   coreTopics: string[];
   keyClaimsOrFacts: string[];
@@ -19,6 +20,7 @@ export async function analyzeWithGemini(
   const targetLanguage = isJapanese ? "Japanese" : "English";
 
   let geminiFetchSuccess = false;
+  let mockFallbackUsed = false;
   let pageSummary = "";
   let coreTopics: string[] = [];
   let keyClaimsOrFacts: string[] = [];
@@ -30,14 +32,14 @@ export async function analyzeWithGemini(
 
       if (serverFetchSuccess && cleanBodyText.trim().length > 0) {
         const fetchPrompt = `You are an AI analyzing the text content of a webpage.
-You must analyze the webpage content retrieved for the URL: "${targetUrl}" using the provided urlContext tool.
+The webpage content was fetched from the URL: "${targetUrl}".
 
 CRITICAL INSTRUCTION: You MUST output all text (summary, topics, claims) strictly in ${targetLanguage}.
 
-Please analyze the webpage content. Extract:
+Please analyze the following webpage content. Extract:
 1. A brief 2-3 sentence summary of the page content.
 2. The core topics or main keywords that are the focus of this page.
-3. The key claims, facts, numbers, or data points specifically stated in the page.
+3. The key claims, facts, numbers, or data points specifically stated in this text.
 4. An evaluation of the content's richness ("HIGH", "MEDIUM", or "LOW") indicating if it has enough detailed information to answer user questions effectively.
 
 Respond ONLY with a valid JSON object in the following format:
@@ -47,7 +49,12 @@ Respond ONLY with a valid JSON object in the following format:
   "coreTopics": ["topic1", "topic2"],
   "keyClaimsOrFacts": ["claim1", "claim2"],
   "contentRichness": "HIGH"
-}`;
+}
+
+Webpage Content:
+"""
+${cleanBodyText.slice(0, 8000)}
+"""`;
 
         const fetchResponse = await ai.models.generateContent({
           model: "gemini-3.1-flash-lite", // Explicit model name per user instruction
@@ -75,7 +82,7 @@ Respond ONLY with a valid JSON object in the following format:
               },
               required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "contentRichness"]
             },
-            tools: [{ urlContext: {} }],
+            tools: [],
             maxOutputTokens: 8192
           }
         });
@@ -99,14 +106,14 @@ Respond ONLY with a valid JSON object in the following format:
           contentRichness = parsedResult.contentRichness || "LOW";
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Gemini Audit Error:", e);
     }
   }
 
   // Fallback to mock data if Gemini API failed or apiKey is missing
   if (!geminiFetchSuccess) {
-    geminiFetchSuccess = true; // set to true for UI logic compatibility as mock was provided
+    mockFallbackUsed = true;
     if (isJapanese) {
       pageSummary = "[MOCK SUMMARY] (実際のAPIキーを設定してLLMフェッチをテストしてください) このページはサービスや最適化プランについて詳述する企業サイトのようです。";
       coreTopics = ["[MOCK] LLMO Optimizer", "[MOCK] 検索エンジン", "[MOCK] ウェブクローラー"];
@@ -122,6 +129,7 @@ Respond ONLY with a valid JSON object in the following format:
 
   return {
     geminiFetchSuccess,
+    mockFallbackUsed,
     pageSummary,
     coreTopics,
     keyClaimsOrFacts,

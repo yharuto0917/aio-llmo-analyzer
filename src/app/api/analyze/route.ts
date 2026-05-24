@@ -70,12 +70,14 @@ export async function POST(req: NextRequest) {
         keyClaimsOrFacts: geminiAnalysis.keyClaimsOrFacts,
         richnessScore,
         contentRichness: geminiAnalysis.contentRichness,
+        mockFallbackUsed: geminiAnalysis.mockFallbackUsed,
       },
       serverFetchSuccess,
       fetchError,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Analysis Exception:", error);
-    return NextResponse.json({ error: error.message || "An error occurred during analysis" }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message || "An error occurred during analysis" }, { status: 500 });
   }
 }

@@ -109,11 +109,27 @@ export function analyzeSeo(targetUrl: string, $: cheerio.CheerioAPI): SeoResult 
   });
 
   let internalLinksCount = 0;
+  let targetHost = "";
+  try {
+    targetHost = new URL(targetUrl).hostname.replace(/^www\./i, "");
+  } catch {}
+
   $("a").each((_, el) => {
-    const href = $(el).attr("href") || "";
-    if (href.startsWith("/") || href.includes(targetUrl.replace(/^https?:\/\/(www\.)?/i, ""))) {
-      internalLinksCount++;
+    const href = ($(el).attr("href") || "").trim();
+    if (!href || href.startsWith("#") || href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+      return;
     }
+    if (href.startsWith("/") || href.startsWith("./") || href.startsWith("../")) {
+      internalLinksCount++;
+      return;
+    }
+    try {
+      const linkUrl = new URL(href, targetUrl);
+      const linkHost = linkUrl.hostname.replace(/^www\./i, "");
+      if (linkHost === targetHost) {
+        internalLinksCount++;
+      }
+    } catch {}
   });
   const linksScore = internalLinksCount > 0 ? 10 : 0;
   seoScore += linksScore;
@@ -141,7 +157,7 @@ export function analyzeSeo(targetUrl: string, $: cheerio.CheerioAPI): SeoResult 
     status: titleScore === 10 ? "pass" : (titleScore === 5 ? "partial" : "fail"),
     description: title 
       ? `Found title tag: "${title}" (${titleLength} chars). Optimal range is 10-60 characters.`
-      : "The HMTL is missing a <title> tag.",
+      : "The HTML is missing a <title> tag.",
   });
 
   const metaDesc = $('meta[name="description"]').attr("content") || "";

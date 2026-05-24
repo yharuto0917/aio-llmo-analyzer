@@ -137,18 +137,30 @@ export function analyzeAio(
 
   // E-E-A-T & Authority (20 pts)
   let outboundHighAuthorityFound = false;
+  let targetHost = "";
+  try {
+    targetHost = new URL(targetUrl).hostname.replace(/^www\./i, "");
+  } catch {}
+
   $("a").each((_, el) => {
-    const href = $(el).attr("href") || "";
-    if (href.startsWith("http") && !href.includes(targetUrl.replace(/^https?:\/\/(www\.)?/i, ""))) {
-      if (
-        href.includes(".edu") ||
-        href.includes(".gov") ||
-        href.includes("wikipedia.org") ||
-        href.includes(".org")
-      ) {
-        outboundHighAuthorityFound = true;
-      }
+    const href = ($(el).attr("href") || "").trim();
+    if (!href.startsWith("http://") && !href.startsWith("https://")) {
+      return;
     }
+    try {
+      const linkUrl = new URL(href);
+      const linkHost = linkUrl.hostname.replace(/^www\./i, "");
+      if (linkHost !== targetHost) {
+        if (
+          linkHost.endsWith(".edu") ||
+          linkHost.endsWith(".gov") ||
+          linkHost.includes("wikipedia.org") ||
+          linkHost.endsWith(".org")
+        ) {
+          outboundHighAuthorityFound = true;
+        }
+      }
+    } catch {}
   });
   const outboundScore = outboundHighAuthorityFound ? 10 : 0;
   aioScore += outboundScore;
