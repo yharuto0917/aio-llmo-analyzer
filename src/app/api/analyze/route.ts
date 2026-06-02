@@ -79,7 +79,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Analysis Exception:", error);
-    const err = error as Error;
-    return NextResponse.json({ error: err.message || "An error occurred during analysis" }, { status: 500 });
+    let errorMessage = "An error occurred during analysis";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

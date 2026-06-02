@@ -32,7 +32,11 @@ export async function analyzeWithGemini(
 
       if (serverFetchSuccess && cleanBodyText.trim().length > 0) {
         const fetchPrompt = `You are an AI analyzing the text content of a webpage.
-You must analyze the webpage content retrieved for the URL: "${targetUrl}" using the provided urlContext tool.
+Below is the text content extracted from the URL: "${targetUrl}".
+
+--- START WEBPAGE CONTENT ---
+${cleanBodyText}
+--- END WEBPAGE CONTENT ---
 
 CRITICAL INSTRUCTION: You MUST output all text (summary, topics, claims) strictly in ${targetLanguage}.
 
@@ -77,7 +81,6 @@ Respond ONLY with a valid JSON object in the following format:
               },
               required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "contentRichness"]
             },
-            tools: [{ urlContext: {} }],
             maxOutputTokens: 8192
           }
         });

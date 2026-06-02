@@ -9,30 +9,102 @@ export interface FetchResult {
   cleanBodyText: string;
 }
 
-function isPrivateIp(ip: string): boolean {
-  // IPv4 checks
-  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  const match = ip.match(ipv4Regex);
-  if (match) {
-    const [, o1, o2] = match.map(Number);
-    if (o1 === 127) return true; // loopback
-    if (o1 === 10) return true; // private
-    if (o1 === 172 && (o2 >= 16 && o2 <= 31)) return true; // private
-    if (o1 === 192 && o2 === 168) return true; // private
-    if (o1 === 169 && o2 === 254) return true; // link-local
-    if (o1 === 0) return true; // current network
-    if (o1 === 100 && (o2 >= 64 && o2 <= 127)) return true; // shared
-    if (o1 === 198 && (o2 === 18 || o2 === 19)) return true; // benchmark
-    if (o1 >= 224) return true; // multicast / reserved
+function parseIpv4ToNumber(hostname: string): number | null {
+  // Validate if hostname only consists of characters potentially representing an IP
+  if (!/^[0-9a-fx\.\:]+$/i.test(hostname)) {
+    return null;
   }
 
-  // IPv6 checks
-  if (ip.startsWith("[") && ip.endsWith("]")) {
-    const ipv6 = ip.slice(1, -1).toLowerCase();
+  // Exclude IPv6
+  if (hostname.includes(":")) {
+    return null;
+  }
+
+  const parts = hostname.split(".");
+  if (parts.length > 4) return null;
+
+  try {
+    const numbers: number[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      let num: number;
+      if (part.startsWith("0x") || part.startsWith("0X")) {
+        num = parseInt(part, 16);
+      } else if (part.startsWith("0") && part.length > 1) {
+        // Octal support
+        num = parseInt(part, 8);
+      } else {
+        num = parseInt(part, 10);
+      }
+      if (isNaN(num) || num < 0 || num > 0xffffffff) {
+        return null;
+      }
+      numbers.push(num);
+    }
+
+    if (numbers.length === 0) return null;
+
+    let ipVal = 0;
+    if (numbers.length === 1) {
+      ipVal = numbers[0];
+    } else if (numbers.length === 2) {
+      if (numbers[0] > 0xff || numbers[1] > 0xffffff) return null;
+      ipVal = (numbers[0] << 24) + numbers[1];
+    } else if (numbers.length === 3) {
+      if (numbers[0] > 0xff || numbers[1] > 0xff || numbers[2] > 0xffff) return null;
+      ipVal = (numbers[0] << 24) + (numbers[1] << 16) + numbers[2];
+    } else if (numbers.length === 4) {
+      if (numbers[0] > 0xff || numbers[1] > 0xff || numbers[2] > 0xff || numbers[3] > 0xff) return null;
+      ipVal = (numbers[0] << 24) + (numbers[1] << 16) + (numbers[2] << 8) + numbers[3];
+    }
+
+    return ipVal >>> 0; // ensure unsigned 32-bit integer
+  } catch {
+    return null;
+  }
+}
+
+function isPrivateIp(ip: string): boolean {
+  // Try IPv4 parsing and check range using 32-bit unsigned integers
+  const ipNum = parseIpv4ToNumber(ip);
+  if (ipNum !== null) {
+    // 0.0.0.0/8 (0 to 16777215)
+    if (ipNum <= 16777215) return true;
+    // 10.0.0.0/8 (167772160 to 184549375)
+    if (ipNum >= 167772160 && ipNum <= 184549375) return true;
+    // 100.64.0.0/10 (1681915904 to 1686110207)
+    if (ipNum >= 1681915904 && ipNum <= 1686110207) return true;
+    // 127.0.0.0/8 (2130706432 to 2147483647)
+    if (ipNum >= 2130706432 && ipNum <= 2147483647) return true;
+    // 169.254.0.0/16 (2851995648 to 2852061183)
+    if (ipNum >= 2851995648 && ipNum <= 2852061183) return true;
+    // 172.16.0.0/12 (2886729728 to 2887778303)
+    if (ipNum >= 2886729728 && ipNum <= 2887778303) return true;
+    // 192.168.0.0/16 (3232235520 to 3232301055)
+    if (ipNum >= 3232235520 && ipNum <= 3232301055) return true;
+    // 198.18.0.0/15 (3323068416 to 3323199487)
+    if (ipNum >= 3323068416 && ipNum <= 3323199487) return true;
+    // 224.0.0.0/4 and above (3758096384 to 4294967295 - Multicast, Reserved, Broadcast)
+    if (ipNum >= 3758096384) return true;
+  }
+
+  // IPv6 checks (support brackets format and raw form)
+  let ipv6 = ip.toLowerCase();
+  if (ipv6.startsWith("[") && ipv6.endsWith("]")) {
+    ipv6 = ipv6.slice(1, -1);
+  }
+  
+  if (ipv6.includes(":")) {
+    // Normalizing IPv6 loopback
     if (ipv6 === "::1" || ipv6 === "0:0:0:0:0:0:0:1") return true;
-    if (ipv6.startsWith("fe80:")) return true; // link-local
-    if (ipv6.startsWith("fc00:") || ipv6.startsWith("fd00:")) return true; // unique local
-    if (ipv6.startsWith("ff00:")) return true; // multicast
+    
+    // Check local prefixes
+    // fe80::/10 (link-local)
+    if (ipv6.startsWith("fe80:") || ipv6.startsWith("fe90:") || ipv6.startsWith("fea0:") || ipv6.startsWith("feb0:")) return true;
+    // fc00::/7 (unique local addresses - fc00:: to fdff::)
+    if (ipv6.startsWith("fc00:") || ipv6.startsWith("fd00:")) return true;
+    // ff00::/8 (multicast)
+    if (ipv6.startsWith("ff")) return true;
   }
   
   return false;
