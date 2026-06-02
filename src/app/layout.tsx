@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LLMO Optimizer",
   description: "Advanced Search Engine, AI Overview, and Large Language Model Optimization Audit Tool.",
+  icons: {
+    icon: "/favicon.jpeg",
+  },
 };
 
 export default function RootLayout({
