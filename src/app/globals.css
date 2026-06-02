@@ -105,8 +105,14 @@ body::after {
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 1.25rem 0.85rem;
   width: 100%;
+}
+
+@media (min-width: 640px) {
+  .app-container {
+    padding: 2.5rem 1.5rem;
+  }
 }
 
 /* Sharp Technical Panel (replaces glass-card) */
@@ -164,7 +170,13 @@ body::after {
 }
 
 .tech-panel-content {
-  padding: 1.75rem;
+  padding: 1.15rem;
+}
+
+@media (min-width: 640px) {
+  .tech-panel-content {
+    padding: 1.75rem;
+  }
 }
 
 /* Scientific Text / Telemetry */
@@ -218,12 +230,22 @@ body::after {
 /* Sharp Technical Console Input Group */
 .console-input-group {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   background: #020203;
   border: 1px solid var(--border-color);
   border-radius: 0px;
-  padding: 0.35rem;
+  padding: 0.5rem;
   transition: all 0.2s ease;
   position: relative;
+}
+
+@media (min-width: 640px) {
+  .console-input-group {
+    flex-direction: row;
+    gap: 0;
+    padding: 0.35rem;
+  }
 }
 
 .console-input-group:focus-within {
@@ -234,12 +256,22 @@ body::after {
 .console-input-prefix {
   display: flex;
   align-items: center;
-  padding: 0 0.85rem;
+  justify-content: center;
+  padding: 0.5rem 0.85rem;
   font-family: var(--font-display);
   font-size: 0.85rem;
   color: var(--color-cyan);
-  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   background: var(--bg-panel-header);
+}
+
+@media (min-width: 640px) {
+  .console-input-prefix {
+    justify-content: flex-start;
+    padding: 0 0.85rem;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+  }
 }
 
 .console-input {
@@ -247,10 +279,17 @@ body::after {
   border: none;
   outline: none;
   color: white;
-  padding: 0.85rem 1rem;
+  padding: 0.65rem 0.75rem;
   flex: 1;
   font-size: 0.95rem;
   font-family: var(--font-mono);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .console-input {
+    padding: 0.85rem 1rem;
+  }
 }
 
 .console-input::placeholder {
@@ -272,8 +311,17 @@ body::after {
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   box-shadow: 0 2px 8px var(--color-cyan-glow);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .console-btn {
+    width: auto;
+    justify-content: flex-start;
+  }
 }
 
 .console-btn:hover:not(:disabled) {
@@ -338,6 +386,11 @@ body::after {
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-panel-header);
   overflow-x: auto;
+  scrollbar-width: none; /* Hide scrollbars in Firefox */
+}
+
+.console-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbars in Chrome/Safari */
 }
 
 .console-tab {
@@ -347,7 +400,7 @@ body::after {
   color: var(--text-muted);
   font-family: var(--font-display);
   font-size: 0.8rem;
-  padding: 0.85rem 1.4rem;
+  padding: 0.85rem 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -355,6 +408,14 @@ body::after {
   gap: 0.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
+  min-height: 44px; /* A11y: standard tap target size for mobile */
+}
+
+@media (min-width: 640px) {
+  .console-tab {
+    padding: 0.85rem 1.4rem;
+  }
 }
 
 .console-tab:hover {

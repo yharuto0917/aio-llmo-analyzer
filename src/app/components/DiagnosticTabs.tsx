@@ -220,7 +220,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
             </div>
 
             {/* Dual Hex Scientific Panels */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "1.25rem" }} className="md:gap-6">
               
               {/* Left: Raw HTML Snippet Console */}
               <div className="tech-panel">
@@ -231,7 +231,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                 <div className="tech-panel-content" style={{ padding: "0" }}>
                   <pre style={{
                     margin: 0,
-                    padding: "1.25rem",
+                    padding: "1rem",
                     background: "#020203",
                     fontFamily: "var(--font-mono)",
                     fontSize: "0.75rem",
