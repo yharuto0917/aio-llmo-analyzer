@@ -382,21 +382,27 @@ body::after {
 
 /* Console Header Tabs */
 .console-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-panel-header);
-  overflow-x: auto;
-  scrollbar-width: none; /* Hide scrollbars in Firefox */
 }
 
-.console-tabs::-webkit-scrollbar {
-  display: none; /* Hide scrollbars in Chrome/Safari */
+@media (min-width: 640px) {
+  .console-tabs {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scrollbar-width: none; /* Hide scrollbars in Firefox */
+  }
+  .console-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbars in Chrome/Safari */
+  }
 }
 
 .console-tab {
   background: transparent;
   border: none;
-  border-right: 1px solid var(--border-color);
   color: var(--text-muted);
   font-family: var(--font-display);
   font-size: 0.8rem;
@@ -405,16 +411,38 @@ body::after {
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center content in grid on mobile */
   gap: 0.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
   min-height: 44px; /* A11y: standard tap target size for mobile */
+  
+  /* Responsive borders for grid on mobile */
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Specific borders for mobile grid layout */
+@media (max-width: 639px) {
+  .console-tab:nth-child(even) {
+    border-right: none; /* Remove right border for second column items */
+  }
+  .console-tab:nth-child(3),
+  .console-tab:nth-child(4) {
+    border-bottom: none; /* Remove bottom border for last row items */
+  }
 }
 
 @media (min-width: 640px) {
   .console-tab {
     padding: 0.85rem 1.4rem;
+    justify-content: flex-start; /* Left-align in desktop tab bar */
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+  }
+  .console-tab:last-child {
+    border-right: none;
   }
 }
 

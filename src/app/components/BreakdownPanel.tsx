@@ -1,6 +1,7 @@
 import React from "react";
 import { Globe, Sparkles, Cpu } from "lucide-react";
 import { getStatusColorClass, SegmentedMeter } from "./Meter";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface BreakdownPanelProps {
   categoryScores: {
@@ -8,7 +9,7 @@ interface BreakdownPanelProps {
     aio: number;
     llmo: number;
   };
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const BreakdownPanel: React.FC<BreakdownPanelProps> = ({ categoryScores, text }) => {

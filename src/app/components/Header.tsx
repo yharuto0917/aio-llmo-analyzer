@@ -1,10 +1,11 @@
 import React from "react";
 import { Terminal } from "lucide-react";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface HeaderProps {
   lang: "en" | "ja";
   setLang: (lang: "en" | "ja") => void;
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const Header: React.FC<HeaderProps> = ({ lang, setLang, text }) => {

@@ -11,13 +11,13 @@ import {
   Info 
 } from "lucide-react";
 import { AnalysisResults } from "../types";
-import { getLocalizedItem } from "../translations";
+import { getLocalizedItem, UIBenchmarkTranslations } from "../translations";
 import { getStatusColorClass, SegmentedMeter } from "./Meter";
 
 interface DiagnosticTabsProps {
   results: AnalysisResults;
   lang: "en" | "ja";
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, text }) => {

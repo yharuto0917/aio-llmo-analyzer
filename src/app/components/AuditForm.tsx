@@ -1,12 +1,13 @@
 import React from "react";
 import { Search, RefreshCw, XCircle } from "lucide-react";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface AuditFormProps {
   url: string;
   setUrl: (url: string) => void;
   loading: boolean;
   error: string | null;
-  text: any;
+  text: UIBenchmarkTranslations;
   onSubmit: (e: React.FormEvent) => void;
 }
 

@@ -45,8 +45,9 @@ export default function Home() {
 
       const data = await res.json();
       setResults(data);
-    } catch (err: any) {
-      let finalErrMsg = err.message || "Failed to connect to the server.";
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Failed to connect to the server.";
+      let finalErrMsg = errMsg;
       // Localize common connection errors
       if (lang === "ja" && finalErrMsg.includes("Could not connect")) {
         finalErrMsg = "指定されたウェブサイトに接続できませんでした（内部エラー）。URLが正しいか、ドメインがオンラインであるかを確認してください。";

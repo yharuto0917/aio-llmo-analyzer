@@ -49,3 +49,8 @@ next-env.d.ts
 
 # Playwright MCP
 .playwright-mcp
+
+# Antigravity Temp Screenshots and Tools
+mobile_screenshot_initial.png
+mobile_screenshot_results.png
+take_screenshot.js
