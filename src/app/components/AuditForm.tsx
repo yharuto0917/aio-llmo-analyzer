@@ -20,7 +20,7 @@ export const AuditForm: React.FC<AuditFormProps> = ({
   onSubmit,
 }) => {
   return (
-    <section style={{ marginBottom: "3.5rem" }}>
+    <section style={{ marginTop: "2.5rem", marginBottom: "5rem" }}>
       <form onSubmit={onSubmit} className="console-input-group">
         <div className="console-input-prefix">{text.cmd_prefix}</div>
         <input
@@ -48,7 +48,7 @@ export const AuditForm: React.FC<AuditFormProps> = ({
 
       {/* Fault / Alarm Banner for unavailable URLs */}
       {error && (
-        <div className="hazard-alert" style={{ marginTop: "1.5rem" }}>
+        <div className="hazard-alert" style={{ marginTop: "2.5rem" }}>
           <div style={{ flexShrink: 0 }}>
             <XCircle size={18} className="display-danger" style={{ marginTop: "0.1rem" }} />
           </div>
