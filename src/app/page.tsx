@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnalysisResults } from "./types";
 import { UI_TRANSLATIONS } from "./translations";
 import { Header } from "./components/Header";
@@ -17,6 +17,11 @@ export default function Home() {
   
   // Interactive mechanical language switch state
   const [lang, setLang] = useState<"en" | "ja">("en");
+
+  // Sync lang attribute on html tag for browser word-breaking rules
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   // Dynamic selector puller helper
   const text = UI_TRANSLATIONS[lang];
@@ -45,8 +50,9 @@ export default function Home() {
 
       const data = await res.json();
       setResults(data);
-    } catch (err: any) {
-      let finalErrMsg = err.message || "Failed to connect to the server.";
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Failed to connect to the server.";
+      let finalErrMsg = errMsg;
       // Localize common connection errors
       if (lang === "ja" && finalErrMsg.includes("Could not connect")) {
         finalErrMsg = "指定されたウェブサイトに接続できませんでした（内部エラー）。URLが正しいか、ドメインがオンラインであるかを確認してください。";
@@ -78,10 +84,10 @@ export default function Home() {
 
         {/* Diagnostic Results Presentation */}
         {results && (
-          <section style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          <section className="flex flex-col gap-6 md:gap-8">
             
             {/* Top Grid: Master Console Readout & Dimensional Bars */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 290px), 1fr))", gap: "1.25rem" }} className="md:gap-6">
               {/* Master score panel */}
               <MasterVerdictPanel totalScore={results.totalScore} text={text} />
 

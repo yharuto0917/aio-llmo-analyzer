@@ -1,6 +1,7 @@
 import React from "react";
 import { Globe, Sparkles, Cpu } from "lucide-react";
 import { getStatusColorClass, SegmentedMeter } from "./Meter";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface BreakdownPanelProps {
   categoryScores: {
@@ -8,7 +9,7 @@ interface BreakdownPanelProps {
     aio: number;
     llmo: number;
   };
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const BreakdownPanel: React.FC<BreakdownPanelProps> = ({ categoryScores, text }) => {
@@ -22,12 +23,12 @@ export const BreakdownPanel: React.FC<BreakdownPanelProps> = ({ categoryScores, 
         
         {/* Traditional SEO */}
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.45rem", fontSize: "0.8rem" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-heading)" }}>
-              <Globe size={13} className="display-cyan" />
-              <span>{text.seo_label}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.45rem", fontSize: "0.8rem", gap: "0.5rem" }}>
+            <span style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "var(--text-heading)", minWidth: 0, flex: 1 }}>
+              <Globe size={13} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
+              <span style={{ wordBreak: "break-word", lineHeight: "1.4" }}>{text.seo_label}</span>
             </span>
-            <span className={getStatusColorClass(categoryScores.seo)} style={{ fontFamily: "var(--font-display)" }}>
+            <span className={getStatusColorClass(categoryScores.seo)} style={{ fontFamily: "var(--font-display)", flexShrink: 0, marginTop: "0.15rem" }}>
               {categoryScores.seo} / 100
             </span>
           </div>
@@ -40,12 +41,12 @@ export const BreakdownPanel: React.FC<BreakdownPanelProps> = ({ categoryScores, 
 
         {/* AI Overview (AIO) */}
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.45rem", fontSize: "0.8rem" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-heading)" }}>
-              <Sparkles size={13} className="display-cyan" />
-              <span>{text.aio_label}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.45rem", fontSize: "0.8rem", gap: "0.5rem" }}>
+            <span style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "var(--text-heading)", minWidth: 0, flex: 1 }}>
+              <Sparkles size={13} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
+              <span style={{ wordBreak: "break-word", lineHeight: "1.4" }}>{text.aio_label}</span>
             </span>
-            <span className={getStatusColorClass(categoryScores.aio)} style={{ fontFamily: "var(--font-display)" }}>
+            <span className={getStatusColorClass(categoryScores.aio)} style={{ fontFamily: "var(--font-display)", flexShrink: 0, marginTop: "0.15rem" }}>
               {categoryScores.aio} / 100
             </span>
           </div>
@@ -58,12 +59,12 @@ export const BreakdownPanel: React.FC<BreakdownPanelProps> = ({ categoryScores, 
 
         {/* LLMO */}
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.45rem", fontSize: "0.8rem" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-heading)" }}>
-              <Cpu size={13} className="display-cyan" />
-              <span>{text.llmo_label}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.45rem", fontSize: "0.8rem", gap: "0.5rem" }}>
+            <span style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "var(--text-heading)", minWidth: 0, flex: 1 }}>
+              <Cpu size={13} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
+              <span style={{ wordBreak: "break-word", lineHeight: "1.4" }}>{text.llmo_label}</span>
             </span>
-            <span className={getStatusColorClass(categoryScores.llmo)} style={{ fontFamily: "var(--font-display)" }}>
+            <span className={getStatusColorClass(categoryScores.llmo)} style={{ fontFamily: "var(--font-display)", flexShrink: 0, marginTop: "0.15rem" }}>
               {categoryScores.llmo} / 100
             </span>
           </div>
