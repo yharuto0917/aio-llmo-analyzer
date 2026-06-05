@@ -77,14 +77,14 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                         {localItem.status === "partial" && <AlertTriangle size={14} className="display-warning" />}
                         {localItem.status === "fail" && <XCircle size={14} className="display-danger" />}
                       </div>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.25rem" }}>
-                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem" }}>{localItem.name}</span>
-                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem" }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.25rem" }}>
+                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem", wordBreak: "break-word", flex: 1, lineHeight: "1.3" }}>{localItem.name}</span>
+                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem", flexShrink: 0, marginTop: "0.05rem" }}>
                             [{localItem.score} / {localItem.max}]
                           </span>
                         </div>
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4" }}>{localItem.description}</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4", wordBreak: "break-word" }}>{localItem.description}</p>
                       </div>
                     </div>
                   </div>
@@ -112,14 +112,14 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                         {localItem.status === "partial" && <AlertTriangle size={14} className="display-warning" />}
                         {localItem.status === "fail" && <XCircle size={14} className="display-danger" />}
                       </div>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.25rem" }}>
-                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem" }}>{localItem.name}</span>
-                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem" }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.25rem" }}>
+                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem", wordBreak: "break-word", flex: 1, lineHeight: "1.3" }}>{localItem.name}</span>
+                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem", flexShrink: 0, marginTop: "0.05rem" }}>
                             [{localItem.score} / {localItem.max}]
                           </span>
                         </div>
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4" }}>{localItem.description}</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4", wordBreak: "break-word" }}>{localItem.description}</p>
                       </div>
                     </div>
                   </div>
@@ -147,14 +147,14 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                         {localItem.status === "partial" && <AlertTriangle size={14} className="display-warning" />}
                         {localItem.status === "fail" && <XCircle size={14} className="display-danger" />}
                       </div>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.25rem" }}>
-                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem" }}>{localItem.name}</span>
-                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem" }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.25rem" }}>
+                          <span style={{ color: "#ffffff", fontWeight: "600", fontSize: "0.85rem", wordBreak: "break-word", flex: 1, lineHeight: "1.3" }}>{localItem.name}</span>
+                          <span className={`bracket-badge ${getStatusColorClass(localItem.score)}`} style={{ fontSize: "0.7rem", flexShrink: 0, marginTop: "0.05rem" }}>
                             [{localItem.score} / {localItem.max}]
                           </span>
                         </div>
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4" }}>{localItem.description}</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: "1.4", wordBreak: "break-word" }}>{localItem.description}</p>
                       </div>
                     </div>
                   </div>
