@@ -1,12 +1,14 @@
 import { DetailItem } from "./types";
 
+const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.2.0";
+
 // English / Japanese UI Static Text Dictionary
 export const UI_TRANSLATIONS = {
   en: {
-    module: "MODULE: AIO_LLMO_INGESTION_LAB_v1.2.0",
-    system_status: "SYSTEM_SECURE // ONLINE",
-    benchmark_title: "COGNITIVE INDEXABILITY DIAGNOSTIC BENCH",
-    app_title: "LLMO Optimizer",
+    module: `MODULE: LLM_SITE_OPTIMIZER_v${appVersion}`,
+    system_status: "GEO / LLMO",
+    benchmark_title: "SITE OPTIMIZATION CHECK FOR LLM INDEXING",
+    app_title: "LLM Site Optimizer",
     app_subtitle: "Scientific auditing tool for parsing platform discoverability metrics across Generative Engine Indexes. Measures semantic indexability, schema entity coverage, and live Gemini ingestion accuracy.",
     cmd_prefix: "CMD://INIT_AUDIT",
     placeholder: "ENTER TARGET DOMAIN OR DIRECT URL (e.g. example.com)",
@@ -61,10 +63,10 @@ export const UI_TRANSLATIONS = {
     mock_warning_text: "Because GEMINI_API_KEY is not set or the API call failed, live LLM retrieval and cognitive analysis have been bypassed. Shown data is simulated using mock text, and LLMO scoring is penalized to 0."
   },
   ja: {
-    module: "モジュール: AIO_LLMO_INGESTION_LAB_v1.2.0",
-    system_status: "システム保護 // オンライン",
-    benchmark_title: "検索認知インデックス診断ベンチマーク",
-    app_title: "LLMO Optimizer",
+    module: `モジュール: LLM_SITE_OPTIMIZER_v${appVersion}`,
+    system_status: "GEO / LLMO",
+    benchmark_title: "LLMによる検索可能性チェックシステム",
+    app_title: "LLM Site Optimizer",
     app_subtitle: "次世代生成AIエンジンにおけるプラットフォームの発見可能性指標を測定する科学的監査ツール。セマンティックインデックス適合性、スキーマエンティティカバー率、およびGeminiによるリアルタイムな情報解釈度を評価します。",
     cmd_prefix: "CMD://診断実行",
     placeholder: "ターゲットドメインまたはURLを入力してください（例：example.com）",
