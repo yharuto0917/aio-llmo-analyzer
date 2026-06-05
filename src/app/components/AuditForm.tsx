@@ -1,12 +1,13 @@
 import React from "react";
 import { Search, RefreshCw, XCircle } from "lucide-react";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface AuditFormProps {
   url: string;
   setUrl: (url: string) => void;
   loading: boolean;
   error: string | null;
-  text: any;
+  text: UIBenchmarkTranslations;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -19,7 +20,7 @@ export const AuditForm: React.FC<AuditFormProps> = ({
   onSubmit,
 }) => {
   return (
-    <section style={{ marginBottom: "3.5rem" }}>
+    <section style={{ marginTop: "2.5rem", marginBottom: "5rem" }}>
       <form onSubmit={onSubmit} className="console-input-group">
         <div className="console-input-prefix">{text.cmd_prefix}</div>
         <input
@@ -47,7 +48,7 @@ export const AuditForm: React.FC<AuditFormProps> = ({
 
       {/* Fault / Alarm Banner for unavailable URLs */}
       {error && (
-        <div className="hazard-alert" style={{ marginTop: "1.5rem" }}>
+        <div className="hazard-alert" style={{ marginTop: "2.5rem" }}>
           <div style={{ flexShrink: 0 }}>
             <XCircle size={18} className="display-danger" style={{ marginTop: "0.1rem" }} />
           </div>

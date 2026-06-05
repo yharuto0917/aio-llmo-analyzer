@@ -1,9 +1,10 @@
 import React from "react";
 import { getStatusColorClass, getStatusColorValues, SegmentedMeter } from "./Meter";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface MasterVerdictPanelProps {
   totalScore: number;
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const MasterVerdictPanel: React.FC<MasterVerdictPanelProps> = ({ totalScore, text }) => {

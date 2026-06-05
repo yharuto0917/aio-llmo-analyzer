@@ -371,3 +371,6 @@ export const getLocalizedItem = (item: DetailItem, lang: "en" | "ja") => {
   }
   return item;
 };
+
+export type UIBenchmarkTranslations = typeof UI_TRANSLATIONS.en;
+

@@ -1,32 +1,34 @@
 import React from "react";
 import { Terminal } from "lucide-react";
+import { UIBenchmarkTranslations } from "../translations";
 
 interface HeaderProps {
   lang: "en" | "ja";
   setLang: (lang: "en" | "ja") => void;
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const Header: React.FC<HeaderProps> = ({ lang, setLang, text }) => {
   return (
     <>
       {/* Dynamic Telemetry Header Bar */}
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        borderBottom: "1px solid var(--border-color)", 
-        paddingBottom: "0.75rem", 
-        marginBottom: "3rem",
-        fontSize: "0.75rem",
-        color: "var(--text-muted)"
-      }}>
+      <div 
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0"
+        style={{ 
+          borderBottom: "1px solid var(--border-color)", 
+          paddingBottom: "0.75rem", 
+          marginBottom: "2rem",
+          fontSize: "0.75rem",
+          color: "var(--text-muted)",
+          width: "100%"
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <span className="blinking-dot" />
           <span className="display-cyan" style={{ letterSpacing: "0.1em" }}>{text.module}</span>
         </div>
         
-        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }} className="w-full sm:w-auto justify-between sm:justify-start">
           {/* Interactive Brutalist Hardware Switch Toggle */}
           <div style={{ 
             display: "flex", 
@@ -73,14 +75,14 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, text }) => {
       </div>
 
       {/* Main Brand Section - Styled as a rugged scientific banner */}
-      <header style={{ marginBottom: "3.5rem" }}>
+      <header className="mb-8 md:mb-14">
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
           <Terminal size={16} className="display-cyan" />
           <span className="display-cyan glow-pulse" style={{ fontSize: "0.85rem", letterSpacing: "0.15em", fontFamily: "var(--font-display)" }}>
             {text.benchmark_title}
           </span>
         </div>
-        <h1 className="display-title" style={{ fontSize: "2.85rem", textTransform: "uppercase", fontWeight: "400", lineHeight: "1.1", marginBottom: "0.75rem" }}>
+        <h1 className="display-title text-2xl sm:text-3xl md:text-[2.85rem]" style={{ textTransform: "uppercase", fontWeight: "400", lineHeight: "1.1", marginBottom: "0.75rem" }}>
           {text.app_title}
         </h1>
         <p style={{ color: "var(--text-main)", fontSize: "0.9rem", maxWidth: "680px", lineHeight: "1.6" }}>

@@ -11,13 +11,13 @@ import {
   Info 
 } from "lucide-react";
 import { AnalysisResults } from "../types";
-import { getLocalizedItem } from "../translations";
+import { getLocalizedItem, UIBenchmarkTranslations } from "../translations";
 import { getStatusColorClass, SegmentedMeter } from "./Meter";
 
 interface DiagnosticTabsProps {
   results: AnalysisResults;
   lang: "en" | "ja";
-  text: any;
+  text: UIBenchmarkTranslations;
 }
 
 export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, text }) => {
@@ -172,7 +172,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
               <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>{text.verify_tab_sub}</p>
             </div>
 
-            {results.llmVerification.mockFallbackUsed && (
+            {results.llmVerification?.mockFallbackUsed && (
               <div style={{
                 background: "var(--color-warning-glow)",
                 border: "1px dashed var(--color-warning)",
@@ -195,36 +195,47 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
             )}
 
             {/* Comprehension Rating Strip */}
-            <div style={{ 
+            <div className="tech-panel" style={{ 
               background: "rgba(0, 229, 255, 0.01)", 
-              border: "1px solid var(--border-color)", 
-              padding: "1.25rem", 
-              marginBottom: "2rem"
+              padding: "1.5rem", 
+              marginBottom: "2.5rem"
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                <span style={{ fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-heading)", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>
-                  <Zap size={14} className="display-cyan" /> {text.verify_coeff}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+                <span style={{ 
+                  fontSize: "0.85rem", 
+                  display: "flex", 
+                  alignItems: "flex-start", 
+                  gap: "0.6rem", 
+                  color: "var(--text-heading)", 
+                  fontFamily: "var(--font-display)", 
+                  letterSpacing: "0.05em",
+                  wordBreak: "break-word",
+                  minWidth: 0,
+                  flex: "1 1 auto"
+                }}>
+                  <Zap size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} /> 
+                  <span>{text.verify_coeff}</span>
                 </span>
-                <span className={`display-title ${getStatusColorClass(results.llmVerification.richnessScore)}`} style={{ fontSize: "1.75rem" }}>
-                  {results.llmVerification.richnessScore}%
+                <span className={`display-title ${getStatusColorClass(results.llmVerification?.richnessScore ?? 0)}`} style={{ fontSize: "1.75rem", flexShrink: 0 }}>
+                  {results.llmVerification?.richnessScore ?? 0}%
                 </span>
               </div>
-              <SegmentedMeter score={results.llmVerification.richnessScore} />
-              <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem", borderTop: "1px solid var(--border-color)", paddingTop: "1rem" }}>
+              <SegmentedMeter score={results.llmVerification?.richnessScore ?? 0} />
+              <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", borderTop: "1px solid var(--border-color)", paddingTop: "1.25rem" }}>
                 <Info size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
-                <p style={{ fontSize: "0.75rem", lineHeight: "1.5", color: "var(--text-main)" }}>
+                <p style={{ fontSize: "0.75rem", lineHeight: "1.6", color: "var(--text-main)" }}>
                   <strong className="display-cyan" style={{ fontFamily: "var(--font-display)" }}>{text.verify_assessment} </strong>
-                  {`${text.content_richness}: ${results.llmVerification.contentRichness} (${text.verify_assessment_text})`}
+                  {`${text.content_richness}: ${results.llmVerification?.contentRichness ?? "LOW"} (${text.verify_assessment_text})`}
                 </p>
               </div>
             </div>
 
             {/* Dual Hex Scientific Panels */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "1.75rem" }} className="md:gap-8">
               
               {/* Left: Raw HTML Snippet Console */}
-              <div className="tech-panel">
-                <div className="tech-panel-header" style={{ background: "#060608" }}>
+              <div className="tech-panel" style={{ minWidth: 0, overflow: "hidden" }}>
+                <div className="tech-panel-header" style={{ background: "#060608", padding: "1rem 1.25rem" }}>
                   <span>{text.buffer_raw}</span>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{text.buffer_raw_sub}</span>
                 </div>
@@ -235,51 +246,55 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                     background: "#020203",
                     fontFamily: "var(--font-mono)",
                     fontSize: "0.75rem",
-                    lineHeight: "1.5",
-                    height: "360px",
+                    lineHeight: "1.6",
+                    height: "380px",
                     overflowY: "auto",
+                    overflowX: "hidden",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
                     color: "var(--color-success)",
                     border: "none"
                   }}>
-                    {results.llmVerification.rawFetchedSnippet}
+                    {results.llmVerification?.rawFetchedSnippet}
                   </pre>
                 </div>
               </div>
 
               {/* Right: Gemini Synthesized JSON Console */}
-              <div className="tech-panel">
-                <div className="tech-panel-header" style={{ background: "#060608" }}>
+              <div className="tech-panel" style={{ minWidth: 0, overflow: "hidden" }}>
+                <div className="tech-panel-header" style={{ background: "#060608", padding: "1rem 1.25rem" }}>
                   <span>{text.buffer_extract}</span>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{text.buffer_extract_sub}</span>
                 </div>
                 <div className="tech-panel-content" style={{ 
-                  padding: "1.25rem", 
+                  padding: "1.5rem", 
                   background: "#020203",
-                  height: "360px", 
+                  height: "380px", 
                   overflowY: "auto",
                   display: "flex", 
                   flexDirection: "column", 
-                  gap: "1.5rem"
+                  gap: "1.75rem"
                 }}>
                   {/* Summary */}
                   <div>
-                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.summary_label}</span>
-                    <p style={{ fontSize: "0.75rem", marginTop: "0.45rem", lineHeight: "1.5", color: "var(--text-main)" }}>
-                      {results.llmVerification.pageSummary}
+                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.summary_label}</span>
+                    <p style={{ fontSize: "0.75rem", marginTop: "0.75rem", lineHeight: "1.6", color: "var(--text-main)" }}>
+                      {results.llmVerification?.pageSummary}
                     </p>
                   </div>
 
                   {/* Entities */}
                   <div>
-                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.entities_label}</span>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem", marginTop: "0.5rem" }}>
-                      {results.llmVerification.coreTopics.map((ent, idx) => (
+                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.entities_label}</span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginTop: "0.75rem" }}>
+                      {results.llmVerification?.coreTopics?.map((ent, idx) => (
                         <span key={idx} style={{ 
                           background: "rgba(0, 229, 255, 0.04)", 
                           border: "1px solid rgba(0, 229, 255, 0.15)", 
-                          padding: "0.25rem 0.5rem", 
+                          padding: "0.35rem 0.65rem", 
                           fontSize: "0.7rem", 
-                          color: "var(--color-cyan)"
+                          color: "var(--color-cyan)",
+                          borderRadius: "2px"
                         }}>
                           {ent}
                         </span>
@@ -289,11 +304,11 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
 
                   {/* Claims */}
                   <div>
-                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>{text.claims_label}</span>
-                    <ul style={{ fontSize: "0.75rem", listStyleType: "none", marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-                      {results.llmVerification.keyClaimsOrFacts.map((stat, idx) => (
-                        <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", lineHeight: "1.4" }}>
-                          <span className="display-cyan" style={{ flexShrink: 0 }}>&gt;&gt;</span>
+                    <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.claims_label}</span>
+                    <ul style={{ fontSize: "0.75rem", listStyleType: "none", marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      {results.llmVerification?.keyClaimsOrFacts?.map((stat, idx) => (
+                        <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", lineHeight: "1.5" }}>
+                          <span className="display-cyan" style={{ flexShrink: 0, marginTop: "0.1rem" }}>&gt;&gt;</span>
                           <span style={{ color: "var(--text-main)" }}>{stat}</span>
                         </li>
                       ))}
