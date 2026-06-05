@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".open-next/**",
     ".wrangler/**",
+    "screenshot.js",
+    "take_screenshot.js",
   ]),
 ]);
 

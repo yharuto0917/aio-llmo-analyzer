@@ -172,7 +172,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
               <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>{text.verify_tab_sub}</p>
             </div>
 
-            {results.llmVerification.mockFallbackUsed && (
+            {results.llmVerification?.mockFallbackUsed && (
               <div style={{
                 background: "var(--color-warning-glow)",
                 border: "1px dashed var(--color-warning)",
@@ -216,16 +216,16 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <Zap size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} /> 
                   <span>{text.verify_coeff}</span>
                 </span>
-                <span className={`display-title ${getStatusColorClass(results.llmVerification.richnessScore)}`} style={{ fontSize: "1.75rem", flexShrink: 0 }}>
-                  {results.llmVerification.richnessScore}%
+                <span className={`display-title ${getStatusColorClass(results.llmVerification?.richnessScore ?? 0)}`} style={{ fontSize: "1.75rem", flexShrink: 0 }}>
+                  {results.llmVerification?.richnessScore ?? 0}%
                 </span>
               </div>
-              <SegmentedMeter score={results.llmVerification.richnessScore} />
+              <SegmentedMeter score={results.llmVerification?.richnessScore ?? 0} />
               <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem", borderTop: "1px solid var(--border-color)", paddingTop: "1.25rem" }}>
                 <Info size={14} className="display-cyan" style={{ flexShrink: 0, marginTop: "0.15rem" }} />
                 <p style={{ fontSize: "0.75rem", lineHeight: "1.6", color: "var(--text-main)" }}>
                   <strong className="display-cyan" style={{ fontFamily: "var(--font-display)" }}>{text.verify_assessment} </strong>
-                  {`${text.content_richness}: ${results.llmVerification.contentRichness} (${text.verify_assessment_text})`}
+                  {`${text.content_richness}: ${results.llmVerification?.contentRichness ?? "LOW"} (${text.verify_assessment_text})`}
                 </p>
               </div>
             </div>
@@ -255,7 +255,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                     color: "var(--color-success)",
                     border: "none"
                   }}>
-                    {results.llmVerification.rawFetchedSnippet}
+                    {results.llmVerification?.rawFetchedSnippet}
                   </pre>
                 </div>
               </div>
@@ -279,7 +279,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.summary_label}</span>
                     <p style={{ fontSize: "0.75rem", marginTop: "0.75rem", lineHeight: "1.6", color: "var(--text-main)" }}>
-                      {results.llmVerification.pageSummary}
+                      {results.llmVerification?.pageSummary}
                     </p>
                   </div>
 
@@ -287,7 +287,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.entities_label}</span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginTop: "0.75rem" }}>
-                      {results.llmVerification.coreTopics.map((ent, idx) => (
+                      {results.llmVerification?.coreTopics?.map((ent, idx) => (
                         <span key={idx} style={{ 
                           background: "rgba(0, 229, 255, 0.04)", 
                           border: "1px solid rgba(0, 229, 255, 0.15)", 
@@ -306,7 +306,7 @@ export const DiagnosticTabs: React.FC<DiagnosticTabsProps> = ({ results, lang, t
                   <div>
                     <span style={{ fontSize: "0.7rem", color: "var(--color-cyan)", textTransform: "uppercase", fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>{text.claims_label}</span>
                     <ul style={{ fontSize: "0.75rem", listStyleType: "none", marginTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                      {results.llmVerification.keyClaimsOrFacts.map((stat, idx) => (
+                      {results.llmVerification?.keyClaimsOrFacts?.map((stat, idx) => (
                         <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", lineHeight: "1.5" }}>
                           <span className="display-cyan" style={{ flexShrink: 0, marginTop: "0.1rem" }}>&gt;&gt;</span>
                           <span style={{ color: "var(--text-main)" }}>{stat}</span>

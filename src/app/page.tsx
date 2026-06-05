@@ -82,7 +82,7 @@ export default function Home() {
           <section className="flex flex-col gap-6 md:gap-8">
             
             {/* Top Grid: Master Console Readout & Dimensional Bars */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "1.25rem" }} className="md:gap-6">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 290px), 1fr))", gap: "1.25rem" }} className="md:gap-6">
               {/* Master score panel */}
               <MasterVerdictPanel totalScore={results.totalScore} text={text} />
 
