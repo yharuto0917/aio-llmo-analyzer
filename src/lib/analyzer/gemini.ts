@@ -6,7 +6,24 @@ export interface GeminiAnalysisResult {
   pageSummary: string;
   coreTopics: string[];
   keyClaimsOrFacts: string[];
+  // Continuous 0-100 retrieval/comprehension fidelity (replaces the old 3-bucket richness).
+  comprehensionScore: number;
+  // Derived label kept for display/back-compat; computed from comprehensionScore.
   contentRichness: "HIGH" | "MEDIUM" | "LOW";
+}
+
+// Clamp an arbitrary model-provided number into a valid 0-100 integer score.
+function clampScore(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+// Derive the coarse display label from the continuous score.
+function richnessLabel(score: number): "HIGH" | "MEDIUM" | "LOW" {
+  if (score >= 75) return "HIGH";
+  if (score >= 40) return "MEDIUM";
+  return "LOW";
 }
 
 export async function analyzeWithGemini(
@@ -24,6 +41,7 @@ export async function analyzeWithGemini(
   let pageSummary = "";
   let coreTopics: string[] = [];
   let keyClaimsOrFacts: string[] = [];
+  let comprehensionScore = 0;
   let contentRichness: "HIGH" | "MEDIUM" | "LOW" = "LOW";
 
   if (apiKey) {
@@ -40,11 +58,19 @@ ${cleanBodyText}
 
 CRITICAL INSTRUCTION: You MUST output all text (summary, topics, claims) strictly in ${targetLanguage}.
 
-Please analyze the webpage content. Extract:
-1. A brief 2-3 sentence summary of the page content.
-2. The core topics or main keywords that are the focus of this page.
-3. The key claims, facts, numbers, or data points specifically stated in the page.
-4. An evaluation of the content's richness ("HIGH", "MEDIUM", or "LOW") indicating if it has enough detailed information to answer user questions effectively.
+Perform the following THREE independent tasks. The summary in TASK A must NOT influence how much you extract in TASK B — they are separate.
+
+[TASK A — Display summary]
+Write a brief 2-3 sentence overview of the page for a human reader. Keep it concise. This is for display only.
+
+[TASK B — EXHAUSTIVE extraction for machine indexing]
+COMPLETENESS is the goal here, not brevity:
+- coreTopics: list every distinct topic, keyword, entity, product, or service the page covers, up to 25 items. If the page has more, keep the 25 most important.
+- keyClaimsOrFacts: list every factual claim, number, statistic, date, price, or concrete data point stated on the page, up to 30 items. If the page has more, keep the 30 most important.
+Do NOT omit, merge, or shorten items to be concise within these limits. Long lists are expected and desirable. Never summarize these two lists.
+
+[TASK C — Comprehension fidelity]
+- comprehensionScore: an INTEGER from 0 to 100 estimating how completely an AI could understand this page and answer real user questions from it. Judge the PAGE's information richness and retrievability — NOT how short your summary is. Use the full range (e.g. 12, 38, 57, 73, 91); do not cluster only at 0, 50, or 100.
 
 Respond ONLY with a valid JSON object in the following format:
 {
@@ -52,7 +78,7 @@ Respond ONLY with a valid JSON object in the following format:
   "summary": "a brief 2-3 sentence summary of the page content",
   "coreTopics": ["topic1", "topic2"],
   "keyClaimsOrFacts": ["claim1", "claim2"],
-  "contentRichness": "HIGH"
+  "comprehensionScore": 0
 }`;
 
         const fetchResponse = await ai.models.generateContent({
@@ -74,19 +100,20 @@ Respond ONLY with a valid JSON object in the following format:
                   type: "ARRAY",
                   items: { type: "STRING" }
                 },
-                contentRichness: { 
-                  type: "STRING",
-                  enum: ["HIGH", "MEDIUM", "LOW"]
+                comprehensionScore: {
+                  type: "NUMBER"
                 }
               },
-              required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "contentRichness"]
+              required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "comprehensionScore"]
             },
-            maxOutputTokens: 8192
+            // Headroom for the exhaustive (capped) extraction lists; truncated JSON
+            // would fail to parse and zero out the LLMO score.
+            maxOutputTokens: 16384
           }
         });
 
         const rawText = fetchResponse.text || "{}";
-        let parsedResult: { success?: boolean; summary?: string; coreTopics?: string[]; keyClaimsOrFacts?: string[]; contentRichness?: "HIGH" | "MEDIUM" | "LOW" } = {};
+        let parsedResult: { success?: boolean; summary?: string; coreTopics?: string[]; keyClaimsOrFacts?: string[]; comprehensionScore?: number } = {};
         try {
           parsedResult = JSON.parse(rawText);
         } catch {
@@ -101,16 +128,18 @@ Respond ONLY with a valid JSON object in the following format:
           pageSummary = parsedResult.summary;
           coreTopics = parsedResult.coreTopics || [];
           keyClaimsOrFacts = parsedResult.keyClaimsOrFacts || [];
-          contentRichness = parsedResult.contentRichness || "LOW";
+          comprehensionScore = clampScore(parsedResult.comprehensionScore);
+          contentRichness = richnessLabel(comprehensionScore);
         } else {
           // LLM successfully responded but returned success: false or invalid JSON.
           // This is a normal LLM evaluation/behavior resulting in a 0 score (no system error is logged).
           geminiFetchSuccess = false;
-          pageSummary = parsedResult.summary || (isJapanese 
-            ? "LLM分析により、このページには有効なコンテンツ構造が検出されませんでした。" 
+          pageSummary = parsedResult.summary || (isJapanese
+            ? "LLM分析により、このページには有効なコンテンツ構造が検出されませんでした。"
             : "No valid content structure was identified on this page during LLM analysis.");
           coreTopics = [];
           keyClaimsOrFacts = [];
+          comprehensionScore = 0;
           contentRichness = "LOW";
         }
       }
@@ -139,6 +168,7 @@ Respond ONLY with a valid JSON object in the following format:
     pageSummary,
     coreTopics,
     keyClaimsOrFacts,
+    comprehensionScore,
     contentRichness,
   };
 }

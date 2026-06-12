@@ -1,6 +1,6 @@
 import { DetailItem } from "./types";
 
-const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.2.0";
+const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "0.1.2";
 
 // English / Japanese UI Static Text Dictionary
 export const UI_TRANSLATIONS = {

@@ -12,18 +12,18 @@ export function analyzeLlmo(geminiAnalysis: GeminiAnalysisResult): LlmoResult {
 
   const {
     geminiFetchSuccess,
+    comprehensionScore,
     contentRichness,
     keyClaimsOrFacts,
     coreTopics,
   } = geminiAnalysis;
 
-  let richnessScore = 0;
-  if (contentRichness === "HIGH") richnessScore = 100;
-  else if (contentRichness === "MEDIUM") richnessScore = 50;
-  else richnessScore = 0;
-
   // LLM Parseability Check (40 pts)
-  const fetchabilityScore = geminiFetchSuccess ? 40 : 0;
+  // Parse success remains the dominant signal (30 pts), with a continuous 0-10 gradient
+  // tied to the comprehension score so this no longer swings as a hard 40/0 cliff.
+  const fetchabilityScore = geminiFetchSuccess
+    ? 30 + Math.round((comprehensionScore / 100) * 10)
+    : 0;
   llmoScore += fetchabilityScore;
   llmoDetails.push({
     name: "LLM URL Context Extraction",
@@ -36,7 +36,8 @@ export function analyzeLlmo(geminiAnalysis: GeminiAnalysisResult): LlmoResult {
   });
 
   // Content Richness Check (20 pts)
-  const accuracyPoints = Math.round((richnessScore / 100) * 20);
+  // Continuous, driven by the 0-100 comprehension score (no more HIGH/MEDIUM/LOW buckets).
+  const accuracyPoints = Math.round((comprehensionScore / 100) * 20);
   llmoScore += accuracyPoints;
   llmoDetails.push({
     name: "LLM Content Richness Score",
@@ -47,29 +48,29 @@ export function analyzeLlmo(geminiAnalysis: GeminiAnalysisResult): LlmoResult {
   });
 
   // Fact & Data-Point Density (20 pts)
-  const hasStats = keyClaimsOrFacts.length >= 3;
-  const statsScore = hasStats ? 20 : (keyClaimsOrFacts.length > 0 ? 10 : 0);
+  // Graduated: ~7 pts per extracted claim up to the 20-pt cap (2 claims now scores, not zero).
+  const statsScore = Math.min(20, keyClaimsOrFacts.length * 7);
   llmoScore += statsScore;
   llmoDetails.push({
     name: "Factual Claims & Data Density",
     score: statsScore,
     max: 20,
-    status: statsScore === 20 ? "pass" : (statsScore === 10 ? "partial" : "fail"),
-    description: hasStats
+    status: statsScore >= 20 ? "pass" : (statsScore > 0 ? "partial" : "fail"),
+    description: keyClaimsOrFacts.length >= 3
       ? `Rich data density! Detected ${keyClaimsOrFacts.length} specific factual claims. Highly beneficial for LLM citations.`
       : `Only found ${keyClaimsOrFacts.length} factual claims. AI systems prioritize clear facts and statistical metrics for claims.`,
   });
 
   // Core Topic Definition (20 pts)
-  const hasEntities = coreTopics.length >= 4;
-  const entityScore = hasEntities ? 20 : (coreTopics.length > 0 ? 10 : 0);
+  // Graduated: 5 pts per extracted topic up to the 20-pt cap.
+  const entityScore = Math.min(20, coreTopics.length * 5);
   llmoScore += entityScore;
   llmoDetails.push({
     name: "Core Topic Density",
     score: entityScore,
     max: 20,
-    status: entityScore === 20 ? "pass" : (entityScore === 10 ? "partial" : "fail"),
-    description: hasEntities
+    status: entityScore >= 20 ? "pass" : (entityScore > 0 ? "partial" : "fail"),
+    description: coreTopics.length >= 4
       ? `Found sufficient core topics. Perfect for entity disambiguation in the LLM Knowledge Graph.`
       : `Low topic count (${coreTopics.length} topics). Make sure your key services and topics are clear.`,
   });
