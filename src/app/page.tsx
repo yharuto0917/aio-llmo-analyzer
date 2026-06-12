@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnalysisResults } from "./types";
 import { UI_TRANSLATIONS } from "./translations";
 import { Header } from "./components/Header";
@@ -17,6 +17,11 @@ export default function Home() {
   
   // Interactive mechanical language switch state
   const [lang, setLang] = useState<"en" | "ja">("en");
+
+  // Sync lang attribute on html tag for browser word-breaking rules
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   // Dynamic selector puller helper
   const text = UI_TRANSLATIONS[lang];

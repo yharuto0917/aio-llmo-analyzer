@@ -29,6 +29,16 @@
   
   --font-mono: 'Fira Code', 'Share Tech Mono', Menlo, Consolas, monospace;
   --font-display: 'Share Tech Mono', monospace;
+  --font-sans-jp: var(--font-noto-sans-jp), sans-serif;
+}
+
+/* Japanese Specific Localization Rules */
+html[lang="ja"] {
+  --font-mono: var(--font-sans-jp);
+  --font-display: var(--font-sans-jp);
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
 }
 
 * {
@@ -162,11 +172,24 @@ body::after {
   padding: 0.85rem 1.25rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.75rem;
   font-family: var(--font-display);
   font-size: 0.85rem;
   letter-spacing: 0.05em;
   color: var(--color-cyan);
+}
+
+.tech-panel-header > span:first-child {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.tech-panel-header > span:last-child {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
 }
 
 .tech-panel-content {
@@ -420,6 +443,18 @@ body::after {
 
 /* Specific borders for mobile grid layout */
 @media (max-width: 639px) {
+  .console-tab {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 0.35rem;
+    text-align: center;
+  }
+  .console-tab span {
+    white-space: normal;
+    word-break: break-all;
+    font-size: 0.7rem;
+    line-height: 1.25;
+  }
   .console-tab:nth-child(even) {
     border-right: none; /* Remove right border for second column items */
   }

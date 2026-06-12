@@ -78,14 +78,14 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, text }) => {
       <header className="mb-8 md:mb-14">
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
           <Terminal size={16} className="display-cyan" />
-          <span className="display-cyan glow-pulse" style={{ fontSize: "0.85rem", letterSpacing: "0.15em", fontFamily: "var(--font-display)" }}>
+          <span className="display-cyan glow-pulse" style={{ fontSize: "0.85rem", letterSpacing: "0.15em", fontFamily: "var(--font-display)", wordBreak: "break-word", overflowWrap: "break-word" }}>
             {text.benchmark_title}
           </span>
         </div>
         <h1 className="display-title text-2xl sm:text-3xl md:text-[2.85rem]" style={{ textTransform: "uppercase", fontWeight: "400", lineHeight: "1.1", marginBottom: "0.75rem" }}>
           {text.app_title}
         </h1>
-        <p style={{ color: "var(--text-main)", fontSize: "0.9rem", maxWidth: "680px", lineHeight: "1.6" }}>
+        <p style={{ color: "var(--text-main)", fontSize: "0.9rem", maxWidth: "680px", lineHeight: "1.6", wordBreak: "break-word", overflowWrap: "break-word" }}>
           {text.app_subtitle}
         </p>
       </header>
