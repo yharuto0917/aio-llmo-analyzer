@@ -48,11 +48,10 @@ export async function POST(req: NextRequest) {
     );
 
     // Build compatibility metrics
-    let richnessScore = 0;
-    if (!geminiAnalysis.mockFallbackUsed) {
-      if (geminiAnalysis.contentRichness === "HIGH") richnessScore = 100;
-      else if (geminiAnalysis.contentRichness === "MEDIUM") richnessScore = 50;
-    }
+    // Continuous 0-100 fidelity score (replaces the old HIGH/MEDIUM/LOW -> 100/50/0 cliff).
+    const richnessScore = geminiAnalysis.mockFallbackUsed
+      ? 0
+      : geminiAnalysis.comprehensionScore;
 
     return NextResponse.json({
       url: targetUrl,
