@@ -65,9 +65,9 @@ Write a brief 2-3 sentence overview of the page for a human reader. Keep it conc
 
 [TASK B — EXHAUSTIVE extraction for machine indexing]
 COMPLETENESS is the goal here, not brevity:
-- coreTopics: list EVERY distinct topic, keyword, entity, product, or service the page covers.
-- keyClaimsOrFacts: list EVERY factual claim, number, statistic, date, price, or concrete data point stated on the page.
-Do NOT omit, merge, or shorten items to be concise. Long lists are expected and desirable. Never summarize these two lists.
+- coreTopics: list every distinct topic, keyword, entity, product, or service the page covers, up to 25 items. If the page has more, keep the 25 most important.
+- keyClaimsOrFacts: list every factual claim, number, statistic, date, price, or concrete data point stated on the page, up to 30 items. If the page has more, keep the 30 most important.
+Do NOT omit, merge, or shorten items to be concise within these limits. Long lists are expected and desirable. Never summarize these two lists.
 
 [TASK C — Comprehension fidelity]
 - comprehensionScore: an INTEGER from 0 to 100 estimating how completely an AI could understand this page and answer real user questions from it. Judge the PAGE's information richness and retrievability — NOT how short your summary is. Use the full range (e.g. 12, 38, 57, 73, 91); do not cluster only at 0, 50, or 100.
@@ -106,7 +106,9 @@ Respond ONLY with a valid JSON object in the following format:
               },
               required: ["success", "summary", "coreTopics", "keyClaimsOrFacts", "comprehensionScore"]
             },
-            maxOutputTokens: 8192
+            // Headroom for the exhaustive (capped) extraction lists; truncated JSON
+            // would fail to parse and zero out the LLMO score.
+            maxOutputTokens: 16384
           }
         });
 
