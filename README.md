@@ -1,8 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AIO & LLMO Analyzer (llm-site-optimizer)
 
-## Getting Started
+このプロジェクトは、Webサイトが従来の検索エンジン（SEO）や、最新のAIモデル（LLM/AIO）に対してどの程度最適化されているかを評価・分析するツールです。指定されたURLを分析し、Next.jsとGemini APIを用いてサイトの構造、コンテンツの可読性、LLMによる理解度を複合的に採点します。
 
-First, run the development server:
+## 主な機能 (Features)
+
+*   **SEO（検索エンジン最適化）分析**:
+    *   タイトル、メタディスクリプション、見出し構造(H1-H6)の適切な使用をチェック。
+    *   画像の代替テキスト(alt属性)やセマンティックHTMLタグの有無など、基本的なSEO要素を評価。
+*   **AIO（AI最適化）分析**:
+    *   コンテンツの可読性、リストや表構造を用いた情報の整理度を評価。
+    *   AIエージェントやLLMがクロールした際の情報抽出のしやすさ(Scannability)を判定。
+*   **LLMO（大規模言語モデル最適化）分析**:
+    *   Google Gemini APIを用いて、実際にLLMが対象ページのコンテンツをどう解釈するかをシミュレーション。
+    *   ページ全体の要約、主要トピックの抽出、主張や事実関係の明確さを評価。
+    *   LLMにとっての「リッチネススコア（理解度スコア）」を算出。
+*   **バイリンガルUI**:
+    *   英語と日本語のUI切り替えをサポート。
+*   **Cloudflare Workers対応**:
+    *   OpenNextを利用し、エッジ環境(Cloudflare Workers)での高速な実行・デプロイに対応。
+
+## 技術スタック (Tech Stack)
+
+*   **フレームワーク**: Next.js 16 (App Router)
+*   **スタイリング**: Tailwind CSS
+*   **HTMLパース**: Cheerio
+*   **AI API**: Google Gemini API (`@google/genai`)
+*   **アイコン**: Lucide React
+*   **デプロイ**: Cloudflare Workers / OpenNext (`@opennextjs/cloudflare`)
+
+## 開発環境のセットアップ (Getting Started)
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 2. 環境変数の設定
+
+プロジェクトのルートディレクトリに `.env.local` ファイルを作成し、Gemini APIキーを設定してください。
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 3. 開発サーバーの起動
+
+標準のNext.js開発サーバーを起動する場合：
 
 ```bash
 npm run dev
@@ -10,27 +58,28 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスするとアプリケーションが表示されます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cloudflare Workersへのデプロイ (Deploy on Cloudflare)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+このプロジェクトは `OpenNext` を利用して Cloudflare Workers 上で実行するように構成されています。
 
-## Learn More
+### ワーカーとしてのローカルプレビュー
 
-To learn more about Next.js, take a look at the following resources:
+ビルドしてWranglerを用いたローカル環境でテストする場合：
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run preview:worker
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Cloudflareへのデプロイ
 
-## Deploy on Vercel
+```bash
+npm run deploy:worker
+# または
+npm run deploy
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Note**: デプロイ前にWranglerの認証 (`npx wrangler login`) と、CloudflareのダッシュボードまたはWrangler経由での環境変数 (`GEMINI_API_KEY`) の設定が必要です。
