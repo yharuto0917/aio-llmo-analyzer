@@ -18,11 +18,20 @@ export default function Home() {
   // Interactive mechanical language switch state
   const [lang, setLang] = useState<"en" | "ja">("en");
 
-  // Sync lang attribute on html tag for browser word-breaking rules
   useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
+    if (typeof window !== "undefined" && navigator.language) {
+      if (navigator.language.startsWith("ja")) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLang("ja");
+      }
+    }
+  }, []);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+    }
+  }, [lang]);
   // Dynamic selector puller helper
   const text = UI_TRANSLATIONS[lang];
 
