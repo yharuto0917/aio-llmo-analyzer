@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnalysisResults } from "./types";
 import { UI_TRANSLATIONS } from "./translations";
 import { Header } from "./components/Header";
@@ -18,6 +18,14 @@ export default function Home() {
   // Interactive mechanical language switch state
   const [lang, setLang] = useState<"en" | "ja">("en");
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && navigator.language) {
+      if (navigator.language.startsWith("ja")) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLang("ja");
+      }
+    }
+  }, []);
   // Dynamic selector puller helper
   const text = UI_TRANSLATIONS[lang];
 
