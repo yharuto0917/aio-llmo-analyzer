@@ -64,3 +64,27 @@ pnpm dev
 ```
 
 ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスするとアプリケーションが表示されます。
+
+## デプロイ (Deployment / Cloudflare Workers)
+
+このプロジェクトには OpenNext (`@opennextjs/cloudflare`) を使用した Cloudflare Workers 向けビルド・デプロイスクリプトが用意されています。
+
+### 前提条件
+
+- Cloudflare アカウントと Wrangler CLI の認証 (`npx wrangler login`)
+- Cloudflare 上での環境変数 (`GEMINI_API_KEY`) の設定
+
+### ローカルでのワーカープレビュー
+
+```bash
+npm run preview:worker
+# (ビルド: npm run build:worker -> ローカルプレビュー: npm run dev:worker)
+```
+
+### デプロイの実行
+
+```bash
+npm run deploy
+# または
+npm run deploy:worker
+```

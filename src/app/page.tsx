@@ -26,6 +26,12 @@ export default function Home() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+    }
+  }, [lang]);
   // Dynamic selector puller helper
   const text = UI_TRANSLATIONS[lang];
 
