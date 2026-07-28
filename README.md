@@ -1,4 +1,10 @@
-# AIO & LLMO Analyzer (llm-site-optimizer)
+# LLM Site Optimizer
+
+![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=flat&logo=next.js)
+![React](https://img.shields.io/badge/React-19.2-blue?style=flat&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)
+![Tailwind_CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat&logo=tailwind-css)
+![Gemini_API](https://img.shields.io/badge/Google_Gemini-API-8E75B2?style=flat&logo=googlegemini)
 
 このプロジェクトは、Webサイトが従来の検索エンジン（SEO）や、最新のAIモデル（LLM/AIO）に対してどの程度最適化されているかを評価・分析するツールです。指定されたURLを分析し、Next.jsとGemini APIを用いてサイトの構造、コンテンツの可読性、LLMによる理解度を複合的に採点します。
 
@@ -16,8 +22,6 @@
     *   LLMにとっての「リッチネススコア（理解度スコア）」を算出。
 *   **バイリンガルUI**:
     *   英語と日本語のUI切り替えをサポート。
-*   **Cloudflare Workers対応**:
-    *   OpenNextを利用し、エッジ環境(Cloudflare Workers)での高速な実行・デプロイに対応。
 
 ## 技術スタック (Tech Stack)
 
@@ -26,7 +30,6 @@
 *   **HTMLパース**: Cheerio
 *   **AI API**: Google Gemini API (`@google/genai`)
 *   **アイコン**: Lucide React
-*   **デプロイ**: Cloudflare Workers / OpenNext (`@opennextjs/cloudflare`)
 
 ## 開発環境のセットアップ (Getting Started)
 
@@ -61,25 +64,3 @@ pnpm dev
 ```
 
 ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスするとアプリケーションが表示されます。
-
-## Cloudflare Workersへのデプロイ (Deploy on Cloudflare)
-
-このプロジェクトは `OpenNext` を利用して Cloudflare Workers 上で実行するように構成されています。
-
-### ワーカーとしてのローカルプレビュー
-
-ビルドしてWranglerを用いたローカル環境でテストする場合：
-
-```bash
-npm run preview:worker
-```
-
-### Cloudflareへのデプロイ
-
-```bash
-npm run deploy:worker
-# または
-npm run deploy
-```
-
-> **Note**: デプロイ前にWranglerの認証 (`npx wrangler login`) と、CloudflareのダッシュボードまたはWrangler経由での環境変数 (`GEMINI_API_KEY`) の設定が必要です。
